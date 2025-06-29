@@ -1,0 +1,89 @@
+const db   = require('../models');
+const Item = db.ingredient;
+const Unit = db.unit;
+
+/* связь: ingredient → unit (если ещё не описана) */
+if (!Item.associations.unit) {
+  Item.belongsTo(Unit, { foreignKey: 'unitid' });
+}
+
+/* ---------- список ---------- */
+exports.list = async (_req, res) =>
+  res.json(await Item.findAll({
+    include:[{ model:Unit, attributes:['unitname'] }],
+    order:[['ingredientid','ASC']]
+  }));
+
+/* ---------- создать ---------- */
+exports.create = async (req, res) => {
+  try {
+    const { name, quantity, unitid, reorderlevel } = req.body;
+    if (!name || !unitid)
+      return res.status(400).json({ error:'name & unitid required' });
+
+    const row = await Item.create({
+      name,
+      quantity    : +quantity     || 0,
+      unitid,
+      reorderlevel: +reorderlevel || 0
+    });
+    res.status(201).json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};
+
+/* ---------- редактировать всю строку ---------- */
+exports.update = async (req, res) => {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+
+    Object.assign(row, {
+      name         : req.body.name,
+      quantity     : +req.body.quantity     || 0,
+      unitid       : req.body.unitid,
+      reorderlevel : +req.body.reorderlevel || 0
+    });
+    await row.save();
+    res.json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};
+
+/* ---------- прибавить / вычесть Δ ---------- */
+async function change(req, res, sign) {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+
+    const delta = +req.body.delta;
+    if (!delta || delta <= 0) return res.status(400).json({ error:'delta>0' });
+
+    const qty = parseFloat(row.quantity) || 0;
+    row.quantity = Math.max(0, qty + sign * delta);
+    await row.save();
+    res.json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+}
+exports.add    = (req, res) => change(req, res, +1);
+exports.remove = (req, res) => change(req, res, -1);
+
+/* ---------- удалить позицию ---------- */
+exports.delete = async (req, res) => {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+    await row.destroy();
+    res.json({ success:true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};

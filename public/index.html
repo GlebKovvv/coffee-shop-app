@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>CafeDB • Главное меню</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <header>
+    <h1 class="brand">Café POS system</h1>
+    <p class="welcome">Добро пожаловать в информационную систему кофейни!</p>
+  </header>
+
+  <nav class="menu">
+    <button data-page="pos">POS (Продажа)</button>
+    <button data-page="queue">Очередь заказов</button>
+    <button data-page="categories">Категории</button>
+    <button data-page="items">Товары</button>
+    <button data-page="extras">Добавки</button>
+    <button data-page="stock">Склад</button>
+    <button data-page="suppliers">Поставщики</button>
+    <button data-page="staff">Сотрудники</button>
+    <button data-page="customers">Клиенты и Лояльность</button>
+    <button data-page="reports">Отчёты</button>
+  </nav>
+
+  <section id="content">
+    <p>Выберите раздел в меню.</p>
+  </section>
+
+  <!-- порядок загрузки скриптов критичен -->
+  <script defer src="js/pos.js"></script>
+  <script defer src="js/queue.js"></script>
+  <script defer src="js/categories.js"></script>
+  <script defer src="js/products.js"></script>
+  <script defer src="js/extrasCrud.js"></script>
+  <script defer src="js/suppliers.js"></script>
+  <script defer src="js/inventory.js"></script>
+  <script defer src="js/staff.js"></script> 
+  <script defer src="js/customers.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script defer src="js/reports.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Cafe POS • Вход</title>
+  <style>
+    body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh}
+    form{border:1px solid #ccc;padding:28px 40px;border-radius:6px;min-width:240px}
+    input{display:block;width:100%;margin:10px 0;padding:6px}
+    button{padding:6px 20px;width:100%}
+    .err{color:#c22;height:1.2em}
+  </style>
+</head>
+<body>
+
+  <form id="frmLogin">
+    <h2>Café&nbsp;POS</h2>
+    <input id="login"  placeholder="Логин">
+    <input id="pass"   placeholder="Пароль" type="password">
+    <button>Войти</button>
+    <p id="err" class="err"></p>
+  </form>
+
+  <!--  скрипт ПОСЛЕ формы  -->
+  <script>
+    document.getElementById('frmLogin').onsubmit = async e => {
+      e.preventDefault();
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('pass').value;
+
+      const r = await fetch('/api/auth/login', {
+        method : 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body   : JSON.stringify({ login, password })
+      });
+
+      if (!r.ok) return document.getElementById('err').textContent = 'Неверный логин или пароль';
+
+      /* cookie с JWT уже установлена, просто идём на SPA */
+      location.href = '/';
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+/* --- базовое оформление главного меню --- */
+body        { font-family: Arial, sans-serif; margin: 2rem; text-align: center; }
+.brand      { margin: .2rem 0 0; }
+.welcome    { color:#555; margin-bottom:2rem; }
+
+.menu {
+  display:grid; gap:1rem;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  margin-bottom:2rem;
+}
+.menu button {
+  padding:.8rem 1rem; font-size:1rem; cursor:pointer;
+  border:1px solid #aaa; border-radius:.5rem;
+  background:#f7f7f7; transition:background .2s;
+}
+.menu button:hover { background:#e0e0e0; }
+.menu button.active { background:#d0f0ff; }
+
+#content { text-align:left; max-width:960px; margin:0 auto; }
+
+/* --- POS-экран --- */
+#pos-wrapper { display:grid; gap:1rem; grid-template-columns:2fr 2fr 1.5fr; }
+
+#catBar { max-height:60vh; overflow-y:auto; border:1px solid #ccc; padding:1rem; }
+#catBar button { display:block; width:100%; margin-bottom:.4rem; }
+
+#itemGrid { display:grid; gap:.4rem; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); }
+#itemGrid .item {
+  padding:.8rem; border:1px solid #ccc; border-radius:.3rem;
+  background:#fafafa; cursor:pointer;
+}
+#itemGrid .item span { font-size:.8rem; color:#555; }
+
+#addonBox { border:1px dashed #aaa; padding:.6rem; min-height:80px; }
+
+#cartPane { border:1px solid #ccc; padding:.6rem; display:flex; flex-direction:column; }
+#cartList { flex:1 1 auto; overflow-y:auto; list-style:none; padding:0; margin:0; }
+#cartList li { border-bottom:1px solid #eee; margin-bottom:.3rem; position:relative; padding-right:24px; }
+#cartList li span { font-size:0.9rem; line-height:1.25; }
+#cartList .delBtn { position:absolute; right:0; top:0; border:none; background:none; cursor:pointer; }
+
+.totals { margin-top:.4rem; line-height:1.4; }
+
+#gridPane { border:1px solid #ccc; padding:.6rem; }
+#grid { display:grid; gap:.5rem; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); }
+.tile { padding:.8rem; border:1px solid #aaa; border-radius:.3rem; background:#eaf9ff; cursor:pointer; }
+.tile.back { background:#ffecec; }
+
+#payPane { border:1px solid #ccc; padding:.6rem; display:flex; flex-direction:column; align-items:center; }
+#calcDisplay { width:100%; text-align:right; font-size:1.2rem; margin-bottom:.3rem; }
+#keypad { display:grid; gap:.3rem; grid-template-columns:repeat(3, 1fr); width:100%; }
+#keypad button { padding:.6rem; font-size:1rem; }
+
+#payType { width:100%; margin-top:.4rem; }
+
+.modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+         background:#fff; border:2px solid #888; padding:1rem; z-index:1000; }
+
+#pos-actions { margin-top:1rem; display:flex; gap:.6rem; justify-content:center; }
+#pos-actions button { padding:.6rem 1rem; cursor:pointer; }
+
+#btnPrint, #btnRemove { display:none !important; }
+
+/* --- Очередь --- */
+#queueTable { width:100%; border-collapse:collapse; table-layout:fixed; }
+#queueTable th, #queueTable td { border:1px solid #ccc; padding:4px; text-align:center; }
+#queueTable .num { width:55px; }
+#queueTable .items { text-align:left; white-space:pre-line; }
+#queueTable tr.danger { background:#ffeaea; }
+#queueTable tr.ready { background:#e6ffe6; }
+
+.hint { font-size:.85rem; color:#666; }
+
+/* --- Таблицы для категорий, товаров, добавок, склада, поставщиков, сотрудников, клиентов --- */
+#catTable, #prodTable, #extraTable, #invTable, #supTable, #stTable, #custTable {
+  width:100%; border-collapse:collapse; margin-top:.8rem;
+}
+#catTable th, #catTable td, #prodTable th, #prodTable td, #extraTable th, #extraTable td,
+#invTable th, #invTable td, #supTable th, #supTable td, #stTable th, #stTable td,
+#custTable th, #custTable td { border:1px solid #ccc; padding:.4rem; text-align:left; }
+
+#catTable button, #prodTable button, #extraTable button, #invTable button, #supTable button, #stTable button, #custTable button {
+  border:none; background:none; cursor:pointer;
+}
+
+#catForm, #prodForm, #extraForm, #invForm, #supForm, #stForm, #custForm {
+  margin-bottom:.6rem;
+}
+#catForm input, #prodForm input, #extraForm input, #invForm input, #supForm input, #stForm input, #custForm input,
+#prodForm select, #invForm select, #stForm select {
+  padding:.4rem .6rem; margin-right:.4rem;
+}
+#catForm button, #prodForm button, #extraForm button, #invForm button, #supForm button, #stForm button, #custForm button {
+  padding:.4rem .8rem; margin-left:.3rem;
+}
+
+#invBody .warn { background:#ffe5e5; }
+
+/* --- Отчёты --- */
+.rep-bar { display:flex; gap:.5rem; align-items:center; margin-bottom:.8rem; flex-wrap:wrap; }
+.rep { border-collapse:collapse; margin-top:.6rem; width:100%; }
+.rep th, .rep td { border:1px solid #ccc; padding:.4rem; text-align:center; }
+
+/* --- Общие элементы --- */
+#overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:998; }
+
+.toast {
+  position:fixed; bottom:1.2rem; left:50%; transform:translate(-50%,20px);
+  background:#333; color:#fff; padding:.6rem 1rem; border-radius:.5rem;
+  opacity:0; transition:all .3s; z-index:1200; font-size:.9rem;
+}
+.toast.show { opacity:1; transform:translate(-50%,0); }
+
+.client { margin-bottom:.5rem; }
+.client input { width:120px; }
+
+#discountLine { color:#009688; font-size:.9rem; }
+
+#userBar{
+  position:fixed; right:8px; top:8px; font-size:14px;
+  background:#f3f3f3; padding:4px 8px; border-radius:4px;
+}
