@@ -1,0 +1,1665 @@
+﻿----- Begin public\css\main.css -----
+/* --- базовое оформление главного меню --- */
+body        { font-family: Arial, sans-serif; margin: 2rem; text-align: center; }
+.brand      { margin: .2rem 0 0; }
+.welcome    { color:#555; margin-bottom:2rem; }
+
+.menu {
+  display:grid; gap:1rem;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  margin-bottom:2rem;
+}
+.menu button {
+  padding:.8rem 1rem; font-size:1rem; cursor:pointer;
+  border:1px solid #aaa; border-radius:.5rem;
+  background:#f7f7f7; transition:background .2s;
+}
+.menu button:hover { background:#e0e0e0; }
+.menu button.active { background:#d0f0ff; }
+
+#content { text-align:left; max-width:960px; margin:0 auto; }
+
+/* --- POS-экран --- */
+#pos-wrapper { display:grid; gap:1rem; grid-template-columns:2fr 2fr 1.5fr; }
+
+#catBar { max-height:60vh; overflow-y:auto; border:1px solid #ccc; padding:1rem; }
+#catBar button { display:block; width:100%; margin-bottom:.4rem; }
+
+#itemGrid { display:grid; gap:.4rem; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); }
+#itemGrid .item {
+  padding:.8rem; border:1px solid #ccc; border-radius:.3rem;
+  background:#fafafa; cursor:pointer;
+}
+#itemGrid .item span { font-size:.8rem; color:#555; }
+
+#addonBox { border:1px dashed #aaa; padding:.6rem; min-height:80px; }
+
+#cartPane { border:1px solid #ccc; padding:.6rem; display:flex; flex-direction:column; }
+#cartList { flex:1 1 auto; overflow-y:auto; list-style:none; padding:0; margin:0; }
+#cartList li { border-bottom:1px solid #eee; margin-bottom:.3rem; position:relative; padding-right:24px; }
+#cartList li span { font-size:0.9rem; line-height:1.25; }
+#cartList .delBtn { position:absolute; right:0; top:0; border:none; background:none; cursor:pointer; }
+
+.totals { margin-top:.4rem; line-height:1.4; }
+
+#gridPane { border:1px solid #ccc; padding:.6rem; }
+#grid { display:grid; gap:.5rem; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); }
+.tile { padding:.8rem; border:1px solid #aaa; border-radius:.3rem; background:#eaf9ff; cursor:pointer; }
+.tile.back { background:#ffecec; }
+
+#payPane { border:1px solid #ccc; padding:.6rem; display:flex; flex-direction:column; align-items:center; }
+#calcDisplay { width:100%; text-align:right; font-size:1.2rem; margin-bottom:.3rem; }
+#keypad { display:grid; gap:.3rem; grid-template-columns:repeat(3, 1fr); width:100%; }
+#keypad button { padding:.6rem; font-size:1rem; }
+
+#payType { width:100%; margin-top:.4rem; }
+
+.modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+         background:#fff; border:2px solid #888; padding:1rem; z-index:1000; }
+
+#pos-actions { margin-top:1rem; display:flex; gap:.6rem; justify-content:center; }
+#pos-actions button { padding:.6rem 1rem; cursor:pointer; }
+
+#btnPrint, #btnRemove { display:none !important; }
+
+/* --- Очередь --- */
+#queueTable { width:100%; border-collapse:collapse; table-layout:fixed; }
+#queueTable th, #queueTable td { border:1px solid #ccc; padding:4px; text-align:center; }
+#queueTable .num { width:55px; }
+#queueTable .items { text-align:left; white-space:pre-line; }
+#queueTable tr.danger { background:#ffeaea; }
+#queueTable tr.ready { background:#e6ffe6; }
+
+.hint { font-size:.85rem; color:#666; }
+
+/* --- Таблицы для категорий, товаров, добавок, склада, поставщиков, сотрудников, клиентов --- */
+#catTable, #prodTable, #extraTable, #invTable, #supTable, #stTable, #custTable {
+  width:100%; border-collapse:collapse; margin-top:.8rem;
+}
+#catTable th, #catTable td, #prodTable th, #prodTable td, #extraTable th, #extraTable td,
+#invTable th, #invTable td, #supTable th, #supTable td, #stTable th, #stTable td,
+#custTable th, #custTable td { border:1px solid #ccc; padding:.4rem; text-align:left; }
+
+#catTable button, #prodTable button, #extraTable button, #invTable button, #supTable button, #stTable button, #custTable button {
+  border:none; background:none; cursor:pointer;
+}
+
+#catForm, #prodForm, #extraForm, #invForm, #supForm, #stForm, #custForm {
+  margin-bottom:.6rem;
+}
+#catForm input, #prodForm input, #extraForm input, #invForm input, #supForm input, #stForm input, #custForm input,
+#prodForm select, #invForm select, #stForm select {
+  padding:.4rem .6rem; margin-right:.4rem;
+}
+#catForm button, #prodForm button, #extraForm button, #invForm button, #supForm button, #stForm button, #custForm button {
+  padding:.4rem .8rem; margin-left:.3rem;
+}
+
+#invBody .warn { background:#ffe5e5; }
+
+/* --- Отчёты --- */
+.rep-bar { display:flex; gap:.5rem; align-items:center; margin-bottom:.8rem; flex-wrap:wrap; }
+.rep { border-collapse:collapse; margin-top:.6rem; width:100%; }
+.rep th, .rep td { border:1px solid #ccc; padding:.4rem; text-align:center; }
+
+/* --- Общие элементы --- */
+#overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:998; }
+
+.toast {
+  position:fixed; bottom:1.2rem; left:50%; transform:translate(-50%,20px);
+  background:#333; color:#fff; padding:.6rem 1rem; border-radius:.5rem;
+  opacity:0; transition:all .3s; z-index:1200; font-size:.9rem;
+}
+.toast.show { opacity:1; transform:translate(-50%,0); }
+
+.client { margin-bottom:.5rem; }
+.client input { width:120px; }
+
+#discountLine { color:#009688; font-size:.9rem; }
+
+#userBar{
+  position:fixed; right:8px; top:8px; font-size:14px;
+  background:#f3f3f3; padding:4px 8px; border-radius:4px;
+}
+----- End   public\css\main.css -----
+
+----- Begin public\index.html -----
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>CafeDB • Главное меню</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <header>
+    <h1 class="brand">Café POS system</h1>
+    <p class="welcome">Добро пожаловать в информационную систему кофейни!</p>
+  </header>
+
+  <nav class="menu">
+    <button data-page="pos">POS (Продажа)</button>
+    <button data-page="queue">Очередь заказов</button>
+    <button data-page="categories">Категории</button>
+    <button data-page="items">Товары</button>
+    <button data-page="extras">Добавки</button>
+    <button data-page="stock">Склад</button>
+    <button data-page="suppliers">Поставщики</button>
+    <button data-page="staff">Сотрудники</button>
+    <button data-page="customers">Клиенты и Лояльность</button>
+    <button data-page="reports">Отчёты</button>
+  </nav>
+
+  <section id="content">
+    <p>Выберите раздел в меню.</p>
+  </section>
+
+  <!-- порядок загрузки скриптов критичен -->
+  <script defer src="js/pos.js"></script>
+  <script defer src="js/queue.js"></script>
+  <script defer src="js/categories.js"></script>
+  <script defer src="js/products.js"></script>
+  <script defer src="js/extrasCrud.js"></script>
+  <script defer src="js/suppliers.js"></script>
+  <script defer src="js/inventory.js"></script>
+  <script defer src="js/staff.js"></script> 
+  <script defer src="js/customers.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script defer src="js/reports.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>
+----- End   public\index.html -----
+
+----- Begin public\js\categories.js -----
+/* ── модуль управления категориями ───────────────────────── */
+
+const CATS = (() => {
+  const $ = sel => document.querySelector(sel);
+  let editId = null;          // какую категорию сейчас редактируем
+
+  /* --- загрузить список --- */
+  async function load() {
+    const list = await fetch('/api/categories').then(r=>r.json());
+    $('#catBody').innerHTML = list.map(c =>
+      `<tr>
+         <td>${c.categoryid}</td>
+         <td>${c.name}</td>
+         <td>
+           <button data-edit="${c.categoryid}" data-name="${c.name}">✎</button>
+           <button data-del="${c.categoryid}">✕</button>
+         </td>
+       </tr>`).join('');
+  }
+
+  /* --- submit формы (добавление или редактирование) --- */
+  async function submit(e) {
+    e.preventDefault();
+    const name = $('#catName').value.trim();
+    if (!name) return alert('Введите название');
+
+    const opts = {
+      method: editId ? 'PUT' : 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name })
+    };
+    const url = editId ? `/api/categories/${editId}` : '/api/categories';
+
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const j = await res.json();
+      alert(j.error || 'Ошибка');
+    } else {
+      editId = null;
+      $('#catForm').reset();
+      load();
+    }
+  }
+
+  /* --- обработка кликов по таблице --- */
+  async function onTableClick(e) {
+    const idDel  = e.target.dataset.del;
+    const idEdit = e.target.dataset.edit;
+
+    if (idDel) {                       // удаление
+      if (!confirm('Удалить категорию?')) return;
+      const r = await fetch(`/api/categories/${idDel}`, { method:'DELETE' });
+      if (!r.ok) {
+        const j = await r.json();
+        alert(j.error || 'Не удалось удалить');
+      }
+      load();
+    }
+
+    if (idEdit) {                      // редактирование
+      editId = idEdit;
+      $('#catName').value = e.target.dataset.name;
+      $('#catName').focus();
+    }
+  }
+
+  /* --- init --- */
+  function init() {
+    load();
+    $('#catForm').addEventListener('submit', submit);
+    $('#catBody').addEventListener('click', onTableClick);
+  }
+
+  return { init };
+})();
+----- End   public\js\categories.js -----
+
+----- Begin public\js\customers.js -----
+/* ─────────────────────────────────────────────────────────────
+   customers.js   |  Клиенты и программа лояльности
+   ───────────────────────────────────────────────────────────── */
+
+(function (global) {
+
+  /* короткие помощники */
+  const $ = s => document.querySelector(s);
+
+  /* ==========================================================
+     1. РЕНДЕР СТРОКИ ТАБЛИЦЫ
+     ========================================================== */
+  function row(cust) {
+    return `<tr data-id="${cust.customerid}">
+      <td>${cust.clientid}</td>
+      <td>${cust.name}</td>
+      <td>${cust.phone ?? '—'}</td>
+      <td class="pts">${cust.loyaltypoints ?? 0}</td>
+      <td>
+        <button data-act="edit">✎</button>
+        <button data-act="del">✕</button>
+      </td>
+    </tr>`;
+  }
+
+  /* ==========================================================
+     2. ЗАГРУЗКА СПИСКА КЛИЕНТОВ
+     ========================================================== */
+  async function load() {
+    const r = await fetch('/api/customers');      // cookie уже содержит JWT
+    if (!r.ok) { alert('Ошибка загрузки клиентов'); return; }
+    const list = await r.json();                  // [{customerid,name,phone,loyaltypoints}, … ]
+    $('#custBody').innerHTML = list.map(row).join('');
+  }
+
+  /* ==========================================================
+     3. СОХРАНЕНИЕ (ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ)
+     ========================================================== */
+  async function save(e) {
+    e.preventDefault();
+    const id    = this.dataset.editId;
+    const body  = {
+      name : $('#custName').value.trim(),
+      phone: $('#custPhone').value.trim(),
+      email: $('#custMail').value.trim()
+    };
+    const url   = id ? `/api/customers/${id}` : '/api/customers';
+    const method= id ? 'PUT' : 'POST';
+
+    const r = await fetch(url, {
+      method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    });
+    if (!r.ok) { alert('Не удалось сохранить'); return; }
+
+    /* очистим форму и перезагрузим список */
+    e.target.reset();
+    delete e.target.dataset.editId;
+    load();
+  }
+
+  /* ==========================================================
+     4. ОБРАБОТЧИК КНОПОК ТАБЛИЦЫ
+     ========================================================== */
+  async function onTable(e) {
+    const act = e.target.dataset.act;
+    if (!act) return;
+    const tr  = e.target.closest('tr');
+    const id  = tr.dataset.id;
+
+    if (act === 'del') {
+      if (!confirm('Удалить клиента?')) return;
+      const r = await fetch(`/api/customers/${id}`, { method:'DELETE' });
+      if (r.ok) tr.remove();
+      else alert('Не удалось удалить');
+    }
+
+    if (act === 'edit') {
+      const cells = tr.children;
+      $('#custName').value  = cells[1].textContent;
+      $('#custPhone').value = cells[2].textContent === '—' ? '' : cells[2].textContent;
+      $('#custMail').value  = '';         // email не выводится в таблице
+      $('#custForm').dataset.editId = id; // помечаем, что это редактирование
+    }
+  }
+
+  /* ==========================================================
+     5. ПУБЛИЧНЫЙ ИНТЕРФЕЙС МОДУЛЯ
+     ========================================================== */
+  function init() {
+    load();
+    $('#custForm').onsubmit = save;
+    $('#custBody').onclick  = onTable;
+  }
+
+  /* экспорт */
+  global.CUSTOMERS = { init };
+
+})(window);
+----- End   public\js\customers.js -----
+
+----- Begin public\js\extrasCrud.js -----
+/* модуль “Добавки”  */
+const EXTRAS = (() => {
+
+  const $ = s => document.querySelector(s);
+  let editId = null;
+
+  async function load() {
+    const list = await fetch('/api/extras').then(r => r.json());
+    $('#extraBody').innerHTML = list.map(e => `
+      <tr>
+        <td>${e.extraid}</td>
+        <td>${e.extraname}</td>
+        <td>${(+e.extraprice).toFixed(2)}</td>
+        <td>
+          <button data-edit="${e.extraid}">✎</button>
+          <button data-del="${e.extraid}">✕</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+
+    const body = {
+      extraname : $('#extraName').value.trim(),
+      extraprice: +$('#extraPrice').value || 0
+    };
+    if (!body.extraname) return alert('Введите название');
+
+    const opt = {
+      method : editId ? 'PUT' : 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body   : JSON.stringify(body)
+    };
+    const url = editId ? `/api/extras/${editId}` : '/api/extras';
+
+    const r = await fetch(url, opt);
+    if (!r.ok) alert('Ошибка');
+
+    editId = null;
+    $('#extraForm').reset();
+    load();
+  }
+
+  async function onTable(e) {
+    const del = e.target.dataset.del;
+    const edt = e.target.dataset.edit;
+
+    if (del) {
+      if (!confirm('Удалить?')) return;
+      const r = await fetch(`/api/extras/${del}`, { method:'DELETE' });
+      if (!r.ok) alert('Ошибка');
+      load();
+    }
+
+    if (edt) {
+      const row = e.target.closest('tr').children;
+      editId = edt;
+      $('#extraName').value  = row[1].textContent;
+      $('#extraPrice').value = row[2].textContent;
+    }
+  }
+
+  function init() {
+    load();
+    $('#extraForm').addEventListener('submit', submit);
+    $('#extraBody').addEventListener('click', onTable);
+  }
+
+  return { init };
+})();
+----- End   public\js\extrasCrud.js -----
+
+----- Begin public\js\inventory.js -----
+/* ──────────────────────────────────────────────────────────
+   public/js/inventory.js  —  управление складом
+   ────────────────────────────────────────────────────────── */
+const INV = (() => {
+
+  const $ = (s, p = document) => p.querySelector(s);
+  let editId = null;
+  const unitMap = new Map();     // unitid → unitname
+
+  /* ---------- единицы измерения ---------- */
+  async function loadUnits() {
+    const sel = $('#invUnit');
+    if (sel.options.length) return;              // уже загружены
+
+    const u = await fetch('/api/units').then(r => r.json());
+    sel.innerHTML = u.map(x => {
+      unitMap.set(x.unitid, x.unitname);
+      return `<option value="${x.unitid}">${x.unitname}</option>`;
+    }).join('');
+  }
+
+  /* ---------- строка таблицы ---------- */
+  function row(r) {
+    return `<tr data-id="${r.ingredientid}" data-unit="${r.unitid}">
+      <td>${r.ingredientid}</td>
+      <td>${r.name}</td>
+      <td>${(+r.quantity).toFixed(2)}</td>
+      <td>${unitMap.get(r.unitid) || r.unit.unitname}</td>
+      <td>${(+r.reorderlevel).toFixed(2)}</td>
+      <td>
+        <button data-act="add">+Δ</button>
+        <button data-act="sub">−Δ</button>
+        <button data-act="edit">✎</button>
+        <button data-act="del">✕</button>
+      </td>
+    </tr>`;
+  }
+
+  /* ---------- загрузка списка ---------- */
+  async function load() {
+    await loadUnits();                                // сначала селект
+    const list = await fetch('/api/inventory').then(r => r.json());
+    $('#invBody').innerHTML = list.map(row).join('');
+  }
+
+  /* ---------- submit (создать / сохранить) ---------- */
+  async function submit(e) {
+    e.preventDefault();
+    const body = {
+      name         : $('#invName').value.trim(),
+      quantity     : +$('#invQty').value  || 0,
+      unitid       : +$('#invUnit').value,
+      reorderlevel : +$('#invMin').value || 0
+    };
+    if (!body.name) return alert('Название?');
+
+    const opt = {
+      method : editId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body   : JSON.stringify(body)
+    };
+    const url = editId ? `/api/inventory/${editId}` : '/api/inventory';
+    const r   = await fetch(url, opt);
+    if (!r.ok) alert('Ошибка');
+
+    editId = null;
+    e.target.reset();
+    load();
+  }
+
+  /* ---------- изменение остатка (±Δ) ---------- */
+  async function change(id, sign) {
+    const d = prompt('Сколько прибавить / вычесть?');
+    if (!d) return;
+    const delta = +d;
+    if (isNaN(delta) || delta <= 0) return alert('Введите положительное число');
+
+    const r = await fetch(`/api/inventory/${id}/${sign}`, {
+      method : 'PATCH',
+      headers: { 'Content-Type':'application/json' },
+      body   : JSON.stringify({ delta })
+    });
+    if (!r.ok) alert('Ошибка');
+    load();
+  }
+
+  /* ---------- действия в таблице ---------- */
+  async function onTable(e) {
+    const tr  = e.target.closest('tr');
+    const id  = tr?.dataset.id;
+    const act = e.target.dataset.act;
+    if (!id || !act) return;
+
+    if (act === 'add')   return change(id, 'add');
+    if (act === 'sub')   return change(id, 'remove');
+
+    if (act === 'edit') {
+      editId = id;
+      $('#invName').value  = tr.children[1].textContent;
+      $('#invQty').value   = parseFloat(tr.children[2].textContent);
+      $('#invUnit').value  = tr.dataset.unit;
+      $('#invMin').value   = parseFloat(tr.children[4].textContent);
+      return;
+    }
+
+    if (act === 'del') {
+      if (!confirm('Удалить позицию склада?')) return;
+      const r = await fetch(`/api/inventory/${id}`, { method:'DELETE' });
+      if (!r.ok) alert('Ошибка');
+      load();
+    }
+  }
+
+  /* ---------- публичный init ---------- */
+  function init() {
+    load();
+    $('#invForm').addEventListener('submit', submit);
+    $('#invBody').addEventListener('click', onTable);
+  }
+
+  return { init };
+})();
+----- End   public\js\inventory.js -----
+
+----- Begin public\js\main.js -----
+/* ==============================================================
+   0. Проверка cookie-токена + старт SPA
+   ============================================================== */
+(async () => {
+  /* пробуем получить данные о пользователе по cookie */
+  const meResp = await fetch('/api/auth/me');
+  if (!meResp.ok) {            // 401 → токен отсутствует или протух
+    return location.href = '/login.html';
+  }
+
+  const me = await meResp.json();   // { userid, role, name }
+
+  /* полоска с именем в правом верхнем углу */
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div id="userBar">👤 ${me.name} (${me.role})
+    <button id="btnLogout" title="Выйти">⎋</button>
+    </div>`
+  );
+document.getElementById('btnLogout').onclick = async () => {
+  await fetch('/api/auth/logout', { method:'POST' });  // сервер очистит cookie
+  location.href = '/login.html';
+};
+
+  /* прячем кнопки меню, недоступные кассиру */
+  if (me.role !== 'admin') {
+    const allowed = ['pos', 'queue', 'stock', 'reports'];
+    document.querySelectorAll('.menu button').forEach(btn => {
+      if (!allowed.includes(btn.dataset.page)) btn.style.display = 'none';
+    });
+  }
+
+  /* запустим главный роутер с домашней заглушкой */
+  load('home');
+})();
+
+/* ==============================================================
+   1. Роутер главного меню
+   ============================================================== */
+const content     = document.getElementById('content');
+const menuButtons = document.querySelectorAll('.menu button');
+
+menuButtons.forEach(btn =>
+  btn.addEventListener('click', () => load(btn.dataset.page, btn))
+);
+
+function load(page, clickedBtn) {
+  /* подсветка активной вкладки */
+  menuButtons.forEach(b => b.classList.remove('active'));
+  (clickedBtn || document.querySelector(`[data-page="${page}"]`))
+    ?.classList.add('active');
+
+  switch (page) {
+
+    /* ---------- Домашняя заглушка ---------- */
+    case 'home':
+      content.innerHTML = '<p>Выберите раздел в левом меню.</p>';
+      break;
+
+    /* ---------- POS ---------- */
+    case 'pos':
+      renderPOS();
+      window.POS.init();
+      break;
+
+    /* ---------- Очередь заказов ---------- */
+    case 'queue':
+      content.innerHTML = `
+        <h2>Очередь заказов</h2>
+        <table id="queueTable">
+          <thead><tr>
+            <th>№</th><th>Время</th><th>Позиции</th>
+            <th>Сумма</th><th>Статус</th><th></th>
+          </tr></thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+        <p class="hint">строки старше&nbsp;5&nbsp;минут подсвечиваются красным</p>`;
+      window.QUEUE.init();
+      break;
+
+    /* ---------- категории ---------- */
+    case 'categories':
+      content.innerHTML = `
+        <h2>Категории</h2>
+        <form id="catForm">
+          <input id="catName" placeholder="Название">
+          <button>Сохранить</button>
+        </form>
+        <table id="catTable">
+          <thead><tr><th>ID</th><th>Название</th><th></th></tr></thead>
+          <tbody id="catBody"></tbody>
+        </table>`;
+      CATS.init();
+      break;
+
+    /* ---------- товары ---------- */
+    case 'items':
+      content.innerHTML = `
+        <h2>Товары</h2>
+        <form id="prodForm">
+          <input id="prodName" placeholder="Название">
+          <select id="prodCat"></select>
+          <input id="prodPrice" type="number" step="0.01" placeholder="Цена">
+          <label><input type="checkbox" id="prodActive" checked> Активен</label>
+          <button>Сохранить</button>
+        </form>
+        <table id="prodTable">
+          <thead><tr><th>ID</th><th>Название</th><th>Категория</th><th>Цена</th><th></th></tr></thead>
+          <tbody id="prodBody"></tbody>
+        </table>`;
+      PRODUCTS.init();
+      break;
+
+    /* ---------- добавки ---------- */
+    case 'extras':
+      content.innerHTML = `
+        <h2>Добавки</h2>
+        <form id="extraForm">
+          <input id="extraName" placeholder="Название">
+          <input id="extraPrice" type="number" step="0.01" placeholder="Цена">
+          <button>Сохранить</button>
+        </form>
+        <table id="extraTable">
+          <thead><tr><th>ID</th><th>Название</th><th>Цена</th><th></th></tr></thead>
+          <tbody id="extraBody"></tbody>
+        </table>`;
+      EXTRAS.init();
+      break;
+
+
+    /* =====  СКЛАД  =========================================== */
+    case 'stock':
+      content.innerHTML = `
+        <h2>Склад</h2>
+        <form id="invForm">
+          <input  id="invName" placeholder="Название">
+          <input  id="invQty"  type="number" step="0.01" placeholder="Кол-во">
+          <select id="invUnit"></select>          <!-- селект вместо input -->
+          <input  id="invMin"  type="number" step="0.01" placeholder="Мин. остаток">
+          <button>Сохранить</button>
+        </form>
+        <table id="invTable">
+          <thead><tr>
+            <th>ID</th><th>Название</th><th>Кол-во</th><th>Ед.</th><th>Мин.</th><th></th>
+          </tr></thead>
+          <tbody id="invBody"></tbody>
+        </table>
+        <p class="hint warn">красный&nbsp;— ниже минимального остатка</p>`;
+      INV.init();
+      break;
+
+    /* =====  ПОСТАВЩИКИ  ======================================= */
+    case 'suppliers':
+      content.innerHTML = `
+        <h2>Поставщики</h2>
+        <form id="supForm">
+          <input id="supName"  placeholder="Название">
+          <input id="supPhone" placeholder="Телефон">
+          <button>Сохранить</button>
+        </form>
+        <table id="supTable">
+          <thead><tr><th>ID</th><th>Название</th><th>Телефон</th><th></th></tr></thead>
+          <tbody id="supBody"></tbody>
+        </table>`;
+      SUPPLIERS.init();
+      break;
+
+    /* =====  СОТРУДНИКИ  ====================================== */
+    case 'staff':
+      content.innerHTML = `
+        <h2>Сотрудники</h2>
+        <form id="stForm">
+          <input id="stName"  placeholder="ФИО">
+          <select id="stPos"></select>
+          <input id="stPhone" placeholder="Телефон">
+          <input id="stMail"  placeholder="Email">
+          <button>Сохранить</button>
+        </form>
+        <table id="stTable">
+          <thead><tr>
+            <th>ID</th><th>ФИО</th><th>Должность</th>
+            <th>Телефон</th><th>Email</th><th></th>
+          </tr></thead>
+          <tbody id="stBody"></tbody>
+        </table>`;
+      STAFF.init();
+      break;
+
+    /* =====  КЛИЕНТЫ  ========================================= */
+    case 'customers':
+      content.innerHTML = `
+        <h2>Клиенты и лояльность</h2>
+        <form id="custForm">
+          <input id="custName"  placeholder="Имя">
+          <input id="custPhone" placeholder="Телефон">
+          <input id="custMail"  placeholder="Email">
+          <button>Сохранить</button>
+        </form>
+        <table id="custTable">
+          <thead><tr>
+            <th>ID</th><th>Имя</th><th>Телефон</th><th>Баллы</th><th></th>
+          </tr></thead>
+          <tbody id="custBody"></tbody>
+        </table>`;
+      CUSTOMERS.init();
+      break;
+
+    /* =====  ОТЧЁТЫ  ========================================== */
+    case 'reports':
+      content.innerHTML = `
+        <h2>Отчёты</h2>
+        <div class="rep-bar">
+          <select id="repType">
+            <option value="sales">Продажи (выручка)</option>
+            <option value="top">Топ-товары</option>
+            <option value="stock">Низкие остатки</option>
+            <option value="staff">Эффективность сотрудников</option>
+          </select>
+          с <input type="date" id="repFrom"> по <input type="date" id="repTo">
+          <button id="repRun">Сформировать</button>
+          <button id="btnCsv">⬇︎ CSV</button>
+        </div>
+        <canvas id="repChart" style="max-height:260px"></canvas>
+        <div id="repOut"></div>`;
+      REPORT.init();
+      break;
+
+    /* =====  fallback  ======================================== */
+    default:
+      content.innerHTML = '<p>Неизвестный раздел.</p>';
+  }
+}
+
+/* ---------- шаблон POS ---------- */
+function renderPOS() {
+  content.innerHTML = `
+    <h2>POS (Продажа)</h2>
+    <div class="client">
+      <input id="phone" placeholder="Телефон клиента">
+      <button id="btnPhone">OK</button>
+    </div>
+
+    <div id="pos-wrapper">
+      <aside id="cartPane">
+        <h3>Корзина</h3>
+        <ul id="cartList"></ul>
+        <div class="totals">
+          <div>Итого: <span id="totalSum">0.00 ₽</span></div>
+          <div id="discountLine"></div>
+          <div>Оплачено: <span id="paidSum">0.00 ₽</span></div>
+          <div>Сдача: <span id="changeSum">0.00 ₽</span></div>
+        </div>
+      </aside>
+
+      <main id="gridPane"><div id="grid"></div></main>
+
+      <section id="payPane">
+        <input id="calcDisplay" value="0" readonly>
+        <div id="keypad">
+          ${[7,8,9,4,5,6,1,2,3,0,'.','C']
+            .map(k => `<button data-key="${k}">${k}</button>`).join('')}
+        </div>
+        <select id="payType">
+          <option value="cash">Наличные</option>
+          <option value="card">Карта</option>
+        </select>
+      </section>
+    </div>
+
+    <div id="pos-actions">
+      <button id="btnClear">Очистить</button>
+      <button id="btnRemove">Удалить позицию</button>
+      <button id="btnPay">Оплатить</button>
+      <button id="btnBack">Назад</button>
+    </div>`;
+}
+
+/* стартовая вкладка */
+----- End   public\js\main.js -----
+
+----- Begin public\js\pos.js -----
+/* ──────────────────────────────────────────────────────────
+   POS-модуль: продажа, корзина, оплата, клиентская скидка
+   ────────────────────────────────────────────────────────── */
+(function (global) {
+
+  /* ────── состояние ────── */
+  let categories = [];       // справочник категорий
+  let items      = [];       // товары выбранной категории
+  let addons     = [];       // все возможные добавки
+
+  let cart    = [];          // [{ item, extras:[{id,назв,цена}], qty }]
+  let curCat  = null;        // id открытой категории
+  let modal   = false;       // открыто ли модальное окно
+  let client  = null;        // { id, name, phone, discount }
+
+  /* ────── утилиты ────── */
+  const $ = s => document.querySelector(s);
+  const money = v => `${(+v).toFixed(2)} ₽`;
+  const toast = msg => {
+    const d = Object.assign(document.createElement('div'),
+      { className: 'toast', innerHTML: msg });
+    document.body.appendChild(d);
+    setTimeout(() => d.classList.add('show'), 10);
+    setTimeout(() => { d.classList.remove('show'); setTimeout(() => d.remove(), 300); }, 3000);
+  };
+
+/* заменить прежнюю версию checkPhone на эту */
+async function checkPhone(){
+  const phone=$('#phone').value.trim();
+  if(!phone) { toast('Введите телефон'); return; }
+
+  const r = await fetch(`/api/customers?phone=${encodeURIComponent(phone)}`);
+  if(r.status===404){                 // бэкенд явно вернул NOT FOUND
+    askClientName(phone); return;
+  }
+  if(r.ok){
+    const data = await r.json();
+    const c = Array.isArray(data) ? data[0] : data;   // массив или объект
+    if(!c || !c.customerid){ askClientName(phone); return; }
+
+    client = { id:c.customerid, name:c.name, phone:c.phone, discount:0.05 };
+    toast(`Клиент: ${c.name}. Скидка 5 %`);
+    redrawCart(); return;
+  }
+  toast('Ошибка поиска клиента');
+}
+
+
+  function askClientName(phone) {
+    modal = true;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="overlay"></div>
+      <div class="modal">
+        <h3>Новый клиент</h3>
+        <input id="newName" placeholder="Имя"><br><br>
+        <button id="okName">OK</button>
+        <button id="cnName">Отмена</button>
+      </div>`);
+    $('#okName').onclick = async () => {
+      const name = $('#newName').value.trim();
+      if (!name) return toast('Введите имя');
+      const r = await fetch('/api/customers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone })
+      });
+      if (!r.ok) { toast('Ошибка добавления клиента'); closeModal(); return; }
+      const c = await r.json();
+      client = { id: c.customerid, name: c.name, phone: c.phone, discount: 0 };
+      toast('Клиент добавлен');
+      closeModal(); redrawCart();
+    };
+    $('#cnName').onclick = closeModal;
+  }
+  const closeModal = () => { modal = false; $('#overlay')?.remove(); $('.modal')?.remove(); };
+
+  /* ──────────────────────────────────────────────────────────
+     2. ЗАГРУЗКА СПРАВОЧНИКОВ
+     ────────────────────────────────────────────────────────── */
+  async function loadInitial() {
+    [categories, addons] = await Promise.all([
+      fetch('/api/categories').then(r => r.json()),
+      fetch('/api/extras').then(r => r.json())
+    ]);
+    renderGrid();                       // показываем категории
+    bindUI();                           // подписки на клики
+    calcChange();                       // расчёт сдачи (нулевой)
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     3. GRID: категории / товары
+     ────────────────────────────────────────────────────────── */
+  function renderGrid(cat = null) {
+    curCat = cat;
+    const g = $('#grid'); g.innerHTML = '';
+    if (!cat) {                        // показываем категории
+      g.innerHTML = categories.map(c =>
+        `<button class="tile" data-cat="${c.categoryid}">${c.name}</button>`).join('');
+      return;
+    }
+    g.innerHTML = '<button class="tile back" data-back>← Назад</button>';
+    fetch(`/api/items?category=${cat}`).then(r => r.json()).then(list => {
+      items = list.map(i => ({ ...i, price: +i.price }));
+      g.innerHTML += items.map(i =>
+        `<button class="tile" data-item="${i.menuitemid}">
+           <span>${i.name}</span><br><small>${money(i.price)}</small>
+         </button>`).join('');
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     4. ДОБАВКИ
+     ────────────────────────────────────────────────────────── */
+  function askAddons(id) {
+    const item = items.find(i => i.menuitemid == id); if (!item) return;
+    modal = true;
+    const list = addons.map(a =>
+      `<label><input type="checkbox" value="${a.extraid}" data-p="${a.extraprice}">
+        ${a.extraname} (+${money(a.extraprice)})</label>`).join('<br>');
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="overlay"></div>
+      <div class="modal">
+        <h3>${item.name}</h3>${list}<br>
+        <button id="addBtn">Добавить</button>
+        <button id="cancelBtn">Отмена</button>
+      </div>`);
+    $('#addBtn').onclick = () => {
+      const extras = [...document.querySelectorAll('.modal input:checked')]
+        .map(cb => ({
+          extraid: +cb.value,
+          extraname: cb.parentElement.textContent.trim(),
+          extraprice: +cb.dataset.p
+        }));
+      closeModal(); addToCart(item, extras);
+    };
+    $('#cancelBtn').onclick = closeModal;
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     5. КОРЗИНА
+     ────────────────────────────────────────────────────────── */
+  const eqArr = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+  function addToCart(item, extras) {
+    const ids = extras.map(e => e.extraid).sort((a, b) => a - b);
+    const found = cart.find(p =>
+      p.item.menuitemid === item.menuitemid &&
+      eqArr(p.extras.map(e => e.extraid).sort((a, b) => a - b), ids));
+    found ? found.qty++ : cart.push({ item, extras, qty: 1 });
+    redrawCart();
+  }
+
+  function redrawCart() {
+    /* список позиций */
+    $('#cartList').innerHTML = cart.map((p, i) => {
+      const base = p.item.price + p.extras.reduce((s, x) => s + x.extraprice, 0);
+      const extras = p.extras.length
+        ? '<ul>' + p.extras.map(x => `<li>${x.extraname}</li>`).join('') + '</ul>' : '';
+      return `<li data-i="${i}">
+        <span>${p.item.name} × ${p.qty}</span> — ${money(base * p.qty)}
+        <button class="delBtn">✕</button>${extras}</li>`;
+    }).join('');
+    document.querySelectorAll('.delBtn').forEach(btn =>
+      btn.onclick = () => { cart.splice(btn.parentElement.dataset.i, 1); redrawCart(); });
+
+    /* итог и скидка */
+    const total = cart.reduce((s, p) =>
+      s + (p.item.price + p.extras.reduce((a, b) => a + b.extraprice, 0)) * p.qty, 0);
+    const disc = client ? +(total * client.discount).toFixed(2) : 0;
+    $('#discountLine').textContent = disc ? `Скидка: -${money(disc)}` : '';
+    $('#totalSum').textContent = money(total - disc);
+
+    syncCard(); calcChange();
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     6. КАЛЬКУЛЯТОР
+     ────────────────────────────────────────────────────────── */
+  function keyPress(e) {
+    const k = e.target.dataset.key; if (!k) return;
+    const d = $('#calcDisplay');
+    if (k === 'C') d.value = '0';
+    else {
+      if (d.value === '0' && k !== '.' && k !== '0') d.value = '';
+      d.value += k;
+    }
+    calcChange();
+  }
+  function calcChange() {
+    const paid = +$('#calcDisplay').value || 0;
+    const total = parseFloat($('#totalSum').textContent) || 0;
+    $('#paidSum').textContent = money(paid);
+    $('#changeSum').textContent = money(Math.max(0, paid - total));
+  }
+  function syncCard() {
+    if ($('#payType').value === 'card')
+      $('#calcDisplay').value = $('#totalSum').textContent.replace(' ₽', '');
+    calcChange();
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     7. СЕРВЕР: СОХРАНИТЬ ЗАКАЗ
+     ────────────────────────────────────────────────────────── */
+  async function saveOrder(discount) {
+    const body = {
+      items: cart.map(p => ({
+        menuitemid: p.item.menuitemid,
+        qty: p.qty,
+        price: p.item.price + p.extras.reduce((s, x) => s + x.extraprice, 0),
+        extras: p.extras.map(x => x.extraid)
+      })),
+      payType: $('#payType').value,
+      staffId: null,
+      clientPhone: client?.phone || null,
+      clientName: client?.name || null,
+      discount
+    };
+    const r = await fetch('/api/orders', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('db');
+    return r.json();              // { orderid, number }
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     8. ПЕЧАТЬ ЧЕКА
+     ────────────────────────────────────────────────────────── */
+  function printReceipt(num, total) {
+    const w = window.open('', '', 'width=280,height=500');
+    const rows = cart.map(p => {
+      const base = p.item.price + p.extras.reduce((s, x) => s + x.extraprice, 0);
+      const extras = p.extras.map(x => '&nbsp;&nbsp;+ ' + x.extraname).join('<br>');
+      return `<tr><td>${p.item.name} ×${p.qty}</td>
+              <td style="text-align:right">${money(base * p.qty)}</td></tr>
+              ${extras ? `<tr><td colspan="2">${extras}</td></tr>` : ''}`;
+    }).join('');
+    const now = new Date().toLocaleString('ru-RU');
+    w.document.write(`<style>@page{size:58mm auto;margin:0}
+      body{font:11px monospace;margin:0;padding:4px}table{width:100%}</style>
+      <center><b>Café POS</b><br>${now}<br>Заказ №${num}</center><hr>
+      <table>${rows}</table><hr>
+      <p>Итого: ${money(total)}</p>
+      <p>${$('#payType').value === 'card' ? 'Карта' : 'Наличные'}</p><hr>
+      <center>Спасибо!</center>`);
+    w.print(); setTimeout(() => w.close(), 100);
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     9. КНОПКИ ДЕЙСТВИЙ
+     ────────────────────────────────────────────────────────── */
+  async function onAction(e) {
+    const id = e.target.id;
+
+    if (id === 'btnClear') { cart = []; redrawCart(); $('#calcDisplay').value = '0'; calcChange(); }
+    if (id === 'btnRemove') { cart.pop(); redrawCart(); }
+    if (id === 'btnBack')   window.load('home');
+
+    if (id === 'btnPay') {
+      if (!cart.length) return toast('Корзина пуста');
+      const total = parseFloat($('#totalSum').textContent) || 0;
+      const paid  = +$('#calcDisplay').value || 0;
+      if (paid < total) return toast('Недостаточно средств');
+
+      const discount = parseFloat($('#discountLine').textContent.replace(/[^\d.]/g, '') || 0);
+
+      try {
+        const o = await saveOrder(discount);
+        if (confirm('Распечатать чек?')) printReceipt(o.number, total);
+        toast(`Заказ №${o.number} сохранён`);
+        cart = []; client = null; $('#phone').value = '';
+        $('#discountLine').textContent = ''; $('#calcDisplay').value = '0';
+        redrawCart();
+      } catch { toast('Ошибка сохранения заказа'); }
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     10. ПОДПИСКИ И СТАРТ
+     ────────────────────────────────────────────────────────── */
+  function bindUI() {
+    /* выбор категорий / товаров */
+    $('#grid').addEventListener('click', e => {
+      if (modal) return;
+      const cat = e.target.closest('[data-cat]')?.dataset.cat;
+      if (cat) return renderGrid(+cat);
+      if (e.target.closest('[data-back]')) return renderGrid();
+      const itm = e.target.closest('[data-item]')?.dataset.item;
+      if (!itm) return;
+      if (curCat === 1 || curCat === 2) askAddons(+itm);
+      else addToCart(items.find(i => i.menuitemid == itm), []);
+    });
+
+    $('#keypad').addEventListener('click', keyPress);
+    $('#pos-actions').addEventListener('click', onAction);
+    $('#btnPhone').addEventListener('click', checkPhone);
+    $('#payType').addEventListener('change', syncCard);
+  }
+
+  /* экспортируем init */
+  global.POS = { init: loadInitial };
+
+})(window);
+----- End   public\js\pos.js -----
+
+----- Begin public\js\products.js -----
+/* ── модуль управление товарами ─────────────────────────── */
+
+const PRODUCTS = (() => {
+  const $ = s => document.querySelector(s);
+  let categories = [], editId=null;
+
+  /* загрузка категорий + списка товаров */
+  async function loadAll() {
+    categories = await fetch('/api/categories').then(r=>r.json());
+    renderCategorySelect();
+    loadItems();
+  }
+  async function loadItems() {
+    const list = await fetch('/api/items').then(r=>r.json());
+    $('#prodBody').innerHTML = list.map(i=>`
+      <tr>
+        <td>${i.menuitemid}</td>
+        <td>${i.name}</td>
+        <td>${i.menucategory?.name||'-'}</td>
+        <td>${i.price}</td>
+        <td>
+          <button data-edit="${i.menuitemid}">✎</button>
+          <button data-del="${i.menuitemid}">✕</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  /* заполнить <select> категориями */
+  function renderCategorySelect() {
+    $('#prodCat').innerHTML = categories
+      .map(c=>`<option value="${c.categoryid}">${c.name}</option>`).join('');
+  }
+
+  /* submit (create / update) */
+  async function submit(e) {
+    e.preventDefault();
+    const body = {
+      name: $('#prodName').value.trim(),
+      categoryid: $('#prodCat').value,
+      price: +$('#prodPrice').value || 0,
+      active: $('#prodActive').checked
+    };
+    if (!body.name) return alert('Введите название');
+
+    const opts = { method: editId?'PUT':'POST',
+                   headers:{'Content-Type':'application/json'},
+                   body: JSON.stringify(body) };
+    const url = editId? `/api/items/${editId}` : '/api/items';
+
+    const r = await fetch(url, opts);
+    if (!r.ok) { alert((await r.json()).error||'Ошибка'); return; }
+
+    editId=null; $('#prodForm').reset(); loadItems();
+  }
+
+  /* обработка таблицы */
+  async function onTableClick(e) {
+    const del = e.target.dataset.del;
+    const edt = e.target.dataset.edit;
+
+    if (del) {
+      if (!confirm('Удалить товар?')) return;
+      const r = await fetch(`/api/items/${del}`, { method:'DELETE' });
+      if (!r.ok) alert((await r.json()).error||'Ошибка удаления');
+      loadItems();
+    }
+    if (edt) {
+      const row = e.target.closest('tr').children;
+      editId = edt;
+      $('#prodName').value  = row[1].textContent;
+      $('#prodCat').value   = categories.find(c=>c.name===row[2].textContent)?.categoryid||'';
+      $('#prodPrice').value = row[3].textContent;
+      $('#prodActive').checked = true;
+    }
+  }
+
+  function init() {
+    loadAll();
+    $('#prodForm').addEventListener('submit', submit);
+    $('#prodBody').addEventListener('click', onTableClick);
+  }
+  return { init };
+})();
+----- End   public\js\products.js -----
+
+----- Begin public\js\queue.js -----
+(function (global) {
+
+  const $    = s => document.querySelector(s);
+  const rub  = v => `${(+v).toFixed(2)} ₽`;
+  const hhmm = d => new Date(d).toLocaleTimeString('ru-RU',
+                      { hour:'2-digit', minute:'2-digit' });
+
+  let timer = null;   // ← чтобы очищать при выходе
+
+  function row(o){
+    const wait=(Date.now()-new Date(o.orderdatetime))/60000;
+    const cls = wait>5?'danger':'';
+    return `<tr data-id="${o.orderid}" class="${cls}">
+      <td class="num">${o.ordernumber ?? o.orderid}</td>
+      <td>${hhmm(o.orderdatetime)}</td>
+      <td class="items">${o.items || '—'}</td>
+      <td>${rub(o.totalamount)}</td>
+      <td class="st">${o.orderstatusid===1?'Готовится':'Готов'}</td>
+      <td><button data-act="done">Готово</button></td>
+    </tr>`;
+  }
+
+  async function load(){
+    /* если мы уже ушли со страницы – ничего не делаем */
+    const body = $('#queueBody'); if(!body){ clearInterval(timer); return; }
+
+    const r = await fetch('/api/orders/active');
+    if(!r.ok){ console.error(await r.text()); return; }
+    body.innerHTML=(await r.json()).map(row).join('');
+  }
+
+  async function done(tr){
+    await fetch(`/api/orders/${tr.dataset.id}/complete`,{method:'PUT'});
+    tr.classList.remove('danger');tr.classList.add('ready');
+    tr.querySelector('.st').textContent='Готов';
+    tr.querySelector('button').remove();
+    setTimeout(()=>tr.remove(),180000);
+  }
+
+  function init(){
+    load(); timer=setInterval(load,5000);
+    $('#queueBody').onclick=e=>{
+      if(e.target.dataset.act==='done') done(e.target.closest('tr'));
+    };
+  }
+
+  global.QUEUE={ init };
+
+})(window);
+----- End   public\js\queue.js -----
+
+----- Begin public\js\reports.js -----
+/* public/js/reports.js
+   Экран «Отчёты» — 4 вида отчётов + график (Chart.js) + CSV-экспорт */
+
+const REPORT = (() => {
+  /* ── короткие утилиты ───────────────────────────────────────── */
+  const $ = s => document.querySelector(s);
+
+  /* безопасно получаем JSON: если сервер вернул HTML/500, ловим */
+  async function getJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt);
+    }
+    return res.json();
+  }
+
+  /* CSV-скачивание */
+  function downloadCSV(rows, filename) {
+    if (!rows || !rows.length) return;
+    const csv = [
+      Object.keys(rows[0]).join(','),
+      ...rows.map(r => Object.values(r).join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* генерация HTML-таблицы */
+  function makeTable(rows) {
+    if (!rows.length) return '<p>Нет данных</p>';
+    return `<table class="rep">
+      <thead><tr>${Object.keys(rows[0]).map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r => `<tr>${Object.values(r).map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  /* ── работа с Chart.js ─────────────────────────────────────── */
+  let chart;                                           // текущий график
+  function drawChart(labels, data, title) {
+    if (chart) chart.destroy();
+    const ctx = $('#repChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: title, data }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales:  { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  /* ── основной запуск отчёта ────────────────────────────────── */
+  async function run() {
+    const type = $('#repType').value;
+    const from = $('#repFrom').value;
+    const to   = $('#repTo').value;
+
+    /* для CSV */
+    let csvRows = [];
+
+    try {
+      switch (type) {
+        /* 1) Продажи */
+        case 'sales': {
+          const r = await getJSON(`/api/reports/sales?from=${from}&to=${to}`);
+          $('#repOut').innerHTML =
+            `<p>Заказов: <b>${r.totals.orders}</b>,
+               сумма: <b>${r.totals.revenue} ₽</b>,
+               средний чек: <b>${r.avgCheck} ₽</b></p>`
+            + makeTable(r.rows);
+          drawChart(r.rows.map(x => x.day),
+                    r.rows.map(x => +x.revenue),
+                    'Выручка, ₽');
+          csvRows = r.rows;
+          break;
+        }
+
+        /* 2) Топ-товары */
+        case 'top': {
+          const rows = await getJSON(`/api/reports/top-products?from=${from}&to=${to}&limit=7`);
+          $('#repOut').innerHTML = makeTable(rows);
+          drawChart(rows.map(r => r.name), rows.map(r => +r.qty), 'Кол-во продаж');
+          csvRows = rows; break;
+        }
+
+        /* 3) Остатки */
+        case 'stock': {
+          const rows = await getJSON('/api/reports/low-stock');
+          $('#repOut').innerHTML = makeTable(rows);
+          if (chart) chart.destroy();
+          csvRows = rows; break;
+        }
+
+        /* 4) По сотрудникам */
+        case 'staff': {
+          const rows = await getJSON(`/api/reports/by-staff?from=${from}&to=${to}`);
+          $('#repOut').innerHTML = makeTable(rows);
+          drawChart(rows.map(r => r.staff),
+                    rows.map(r => +r.revenue),
+                    'Выручка, ₽');
+          csvRows = rows; break;
+        }
+      }
+
+      /* кнопка CSV доступна, если есть строки */
+      $('#btnCsv').onclick = () =>
+        csvRows.length && downloadCSV(csvRows, 'report.csv');
+
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка: ' + err.message);
+      $('#repOut').innerHTML = '<p class="error">Не удалось получить данные отчёта.</p>';
+      if (chart) chart.destroy();
+    }
+  }
+
+  /* ── init: ставим «сегодня» по умолчанию и вешаем события ─── */
+  function init() {
+    const today = new Date().toISOString().slice(0, 10);
+    $('#repFrom').value = today;
+    $('#repTo').value   = today;
+    $('#repRun').onclick = run;
+  }
+
+  return { init };
+})();
+----- End   public\js\reports.js -----
+
+----- Begin public\js\staff.js -----
+/* public/js/staff.js
+   CRUD-модуль «Сотрудники» */
+
+const STAFF = (() => {
+  const $ = sel => document.querySelector(sel);
+
+  let editId   = null; // какого сотрудника редактируем
+  let positions = [];  // справочник должностей
+
+  /* ---------- загрузка должностей ---------- */
+  async function loadPositions() {
+    positions = await fetch('/api/positions').then(r => r.json());
+    $('#stPos').innerHTML = positions
+      .map(p => `<option value="${p.positionid}">${p.positionname}</option>`)
+      .join('');
+  }
+
+  /* ---------- загрузка сотрудников ---------- */
+  async function loadStaff() {
+    const list = await fetch('/api/staff').then(r => r.json());
+
+    $('#stBody').innerHTML = list.map(s => `
+      <tr>
+        <td>${s.employeeid || s.staffid}</td>
+        <td>${s.name}</td>
+        <td>${s.position ? s.position.positionname : ''}</td>
+        <td>${s.phone || ''}</td>
+        <td>${s.email || ''}</td>
+        <td>
+          <button data-edit="${s.employeeid || s.staffid}">✎</button>
+          <button data-del="${s.employeeid || s.staffid}">✕</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  /* ---------- сохранение (создать / обновить) ---------- */
+  async function submit(e) {
+    e.preventDefault();
+
+    const body = {
+      name:       $('#stName').value.trim(),
+      positionid: $('#stPos').value,
+      phone:      $('#stPhone').value.trim(),
+      email:      $('#stMail').value.trim()
+    };
+    if (!body.name || !body.positionid) {
+      return alert('ФИО и должность обязательны');
+    }
+
+    const opts = {
+      method: editId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    };
+    const url = editId ? `/api/staff/${editId}` : '/api/staff';
+
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const j = await res.json();
+      alert(j.error || 'Ошибка сохранения');
+      return;
+    }
+    editId = null;
+    $('#stForm').reset();
+    loadStaff();
+  }
+
+  /* ---------- клики по таблице ---------- */
+  async function onTableClick(e) {
+    const delId = e.target.dataset.del;
+    const editIdAttr = e.target.dataset.edit;
+
+    /* удалить */
+    if (delId) {
+      if (!confirm('Удалить сотрудника?')) return;
+
+      const res = await fetch(`/api/staff/${delId}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadStaff();
+      } else {
+        const j = await res.json();
+        const msg = j.error === 'has linked records'
+          ? 'Нельзя удалить: есть связанные записи (например, заказы).'
+          : j.error || 'Ошибка удаления';
+        alert(msg);
+      }
+    }
+
+    /* редактировать */
+    if (editIdAttr) {
+      editId = editIdAttr;
+
+      const cells = e.target.closest('tr').children;
+      $('#stName').value  = cells[1].textContent;
+      $('#stPos').value   = positions.find(p => p.positionname === cells[2].textContent)?.positionid || '';
+      $('#stPhone').value = cells[3].textContent;
+      $('#stMail').value  = cells[4].textContent;
+    }
+  }
+
+  /* ---------- init ---------- */
+  function init() {
+    loadPositions().then(loadStaff);
+    $('#stForm').addEventListener('submit', submit);
+    $('#stBody').addEventListener('click', onTableClick);   // ← исправлено
+  }
+
+  return { init };
+})();
+----- End   public\js\staff.js -----
+
+----- Begin public\js\suppliers.js -----
+/* public/js/suppliers.js
+   CRUD-модуль для экрана «Поставщики» */
+
+const SUPPLIERS = (() => {
+  const $ = sel => document.querySelector(sel);
+  let editId = null;
+
+  // 1) Загрузить список поставщиков и отрисовать таблицу
+  async function load() {
+    const list = await fetch('/api/suppliers').then(r => r.json());
+    $('#supBody').innerHTML = list.map(s => `
+      <tr>
+        <td>${s.supplierid}</td>
+        <td>${s.suppliername}</td>
+        <td>${s.phone || ''}</td>
+        <td>
+          <button data-edit="${s.supplierid}" data-name="${s.suppliername}" data-phone="${s.phone || ''}">✎</button>
+          <button data-del="${s.supplierid}">✕</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  // 2) Обработка формы добавления/редактирования
+  async function submit(e) {
+    e.preventDefault();
+    const body = {
+      suppliername: $('#supName').value.trim(),
+      phone:        $('#supPhone').value.trim()
+    };
+    if (!body.suppliername) return alert('Введите название поставщика');
+
+    const opts = {
+      method: editId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    };
+    const url = editId
+      ? `/api/suppliers/${editId}`
+      : '/api/suppliers';
+
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const j = await res.json();
+      return alert(j.error || 'Ошибка при сохранении');
+    }
+    editId = null;
+    $('#supForm').reset();
+    load();
+  }
+
+  // 3) Клики по таблице (редактировать / удалить)
+  async function onTableClick(e) {
+    const delId = e.target.dataset.del;
+    const edtId = e.target.dataset.edit;
+
+    if (delId) {
+      if (!confirm('Удалить поставщика?')) return;
+      await fetch(`/api/suppliers/${delId}`, { method: 'DELETE' });
+      load();
+    }
+
+    if (edtId) {
+      editId = edtId;
+      $('#supName').value  = e.target.dataset.name;
+      $('#supPhone').value = e.target.dataset.phone;
+    }
+  }
+
+  // 4) Инициализация модуля
+  function init() {
+    load();
+    $('#supForm').addEventListener('submit', submit);
+    $('#supBody').addEventListener('click', onTableClick);
+  }
+
+  return { init };
+})();
+----- End   public\js\suppliers.js -----
+
+----- Begin public\js\useraccount.js -----
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define('useraccount', {
+    userid : { type: DataTypes.INTEGER, primaryKey:true, autoIncrement:true },
+    login  : { type: DataTypes.STRING,  unique:true, allowNull:false },
+    role   : { type: DataTypes.ENUM('admin','cashier'), allowNull:false },
+    active : { type: DataTypes.BOOLEAN, defaultValue:true }
+  }, { timestamps:false });
+
+  User.associate = models => {
+    User.belongsTo(models.staff, { foreignKey:'staffid' });
+  };
+  return User;
+};
+----- End   public\js\useraccount.js -----
+
+----- Begin public\login.html -----
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Cafe POS • Вход</title>
+  <style>
+    body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh}
+    form{border:1px solid #ccc;padding:28px 40px;border-radius:6px;min-width:240px}
+    input{display:block;width:100%;margin:10px 0;padding:6px}
+    button{padding:6px 20px;width:100%}
+    .err{color:#c22;height:1.2em}
+  </style>
+</head>
+<body>
+
+  <form id="frmLogin">
+    <h2>Café&nbsp;POS</h2>
+    <input id="login"  placeholder="Логин">
+    <input id="pass"   placeholder="Пароль" type="password">
+    <button>Войти</button>
+    <p id="err" class="err"></p>
+  </form>
+
+  <!--  скрипт ПОСЛЕ формы  -->
+  <script>
+    document.getElementById('frmLogin').onsubmit = async e => {
+      e.preventDefault();
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('pass').value;
+
+      const r = await fetch('/api/auth/login', {
+        method : 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body   : JSON.stringify({ login, password })
+      });
+
+      if (!r.ok) return document.getElementById('err').textContent = 'Неверный логин или пароль';
+
+      /* cookie с JWT уже установлена, просто идём на SPA */
+      location.href = '/';
+    };
+  </script>
+</body>
+</html>
+----- End   public\login.html -----
+

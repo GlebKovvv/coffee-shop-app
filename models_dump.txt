@@ -1,0 +1,1079 @@
+﻿----- Begin src\models\Category.js -----
+const db = require('../config/db');
+
+exports.findAll = async () => {
+  const { rows } = await db.query(
+    'SELECT categoryid, name, description FROM menucategory ORDER BY categoryid'
+  );
+  return rows;
+};
+
+exports.create = async ({ name, description }) => {
+  const { rows } = await db.query(
+    'INSERT INTO menucategory (name, description) VALUES ($1,$2) RETURNING *',
+    [name, description ?? null]
+  );
+  return rows[0];
+};
+----- End   src\models\Category.js -----
+
+----- Begin src\models\client.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('client', {
+    clientid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    phone: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    email: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'client',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16391_pk__client__e67e1a04f226a219",
+        unique: true,
+        fields: [
+          { name: "clientid" },
+        ]
+      },
+      {
+        name: "idx_16391_uq__client__5c7e359eb659f841",
+        unique: true,
+        fields: [
+          { name: "phone" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\client.js -----
+
+----- Begin src\models\customerloyalty.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('customerloyalty', {
+    customerloyaltyid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    clientid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'client',
+        key: 'clientid'
+      }
+    },
+    loyaltycardnumber: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    pointsbalance: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    status: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'customerloyalty',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16398_pk_customerloyalty_temp",
+        unique: true,
+        fields: [
+          { name: "customerloyaltyid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\customerloyalty.js -----
+
+----- Begin src\models\discount.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('discount', {
+    discountid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    discountname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    discounttype: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    discountvalue: {
+      type: DataTypes.DECIMAL,
+      allowNull: false
+    },
+    startdate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    enddate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    conditions: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'discount',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16405_pk__discount__e43f6df6896a4160",
+        unique: true,
+        fields: [
+          { name: "discountid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\discount.js -----
+
+----- Begin src\models\extras.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('extras', {
+    extraid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    extraname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    extraprice: {
+      type: DataTypes.DECIMAL,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'extras',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16419_pk__extras__d1f3a827d7d2d4df",
+        unique: true,
+        fields: [
+          { name: "extraid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\extras.js -----
+
+----- Begin src\models\index.js -----
+// src/models/index.js
+'use strict';
+
+const fs         = require('fs');
+const path       = require('path');
+const Sequelize  = require('sequelize');
+const sequelize  = require('../config/db'); // ← уже настроенный экземпляр
+const basename   = path.basename(__filename);
+const db         = {};
+
+// 1) Динамический импорт моделей (*.js)
+fs.readdirSync(__dirname)
+  .filter(
+    file =>
+      file.indexOf('.') !== 0 &&          // не скрытые
+      file !== basename &&                // не index.js
+      file.slice(-3) === '.js'            // только .js
+  )
+  .forEach(file => {
+    const candidate = require(path.join(__dirname, file));
+
+    // Берём только те файлы, которые экспортируют функцию-фабрику модели
+    if (typeof candidate === 'function') {
+      const model = candidate(sequelize, Sequelize.DataTypes);
+      db[model.name] = model;
+    } else {
+      console.warn(
+        `[models] Файл «${file}» пропущен: export не функция (type=${typeof candidate})`
+      );
+    }
+  });
+
+
+/* ---------- Ручные ассоциации ---------- */
+
+// menuitem ↔ menucategory
+if (db.menuitem && db.menucategory) {
+  db.menuitem.belongsTo(db.menucategory, { foreignKey: 'categoryid' });
+  db.menucategory.hasMany(db.menuitem,  { foreignKey: 'categoryid' });
+}
+
+// order ↔ orderitem
+if (db.order && db.orderitem) {
+  db.order.hasMany(db.orderitem,      { foreignKey: 'orderid' });
+  db.orderitem.belongsTo(db.order,    { foreignKey: 'orderid' });
+}
+
+// orderitemaddons  (таблица-связка)
+if (db.orderitem && db.orderitemaddons) {
+  db.orderitem.hasMany(db.orderitemaddons,  { foreignKey: 'orderitemid' });
+  db.orderitemaddons.belongsTo(db.orderitem,{ foreignKey: 'orderitemid' });
+}
+
+// orderitem ↔ extras  (many-to-many через orderitemaddons)
+if (db.orderitem && db.extras && db.orderitemaddons) {
+  db.orderitem.belongsToMany(db.extras, {
+    through: db.orderitemaddons,
+    foreignKey: 'orderitemid',
+    otherKey:  'extraid'
+  });
+  db.extras.belongsToMany(db.orderitem, {
+    through: db.orderitemaddons,
+    foreignKey: 'extraid',
+    otherKey:  'orderitemid'
+  });
+}
+
+// inventoryitem ↔ supplier
+if (db.inventoryitem && db.supplier) {
+  db.supplier.hasMany(db.inventoryitem, { foreignKey: 'supplierid' });
+  db.inventoryitem.belongsTo(db.supplier,{ foreignKey: 'supplierid' });
+}
+
+// ingredient ↔ unit
+if (db.ingredient && db.unit) {
+  db.unit.hasMany(db.ingredient, { foreignKey: 'unitid' });
+  db.ingredient.belongsTo(db.unit,{ foreignKey: 'unitid' });
+}
+
+// staff ↔ position
+if (db.staff && db.position) {
+  db.position.hasMany(db.staff, { foreignKey: 'positionid' });
+  db.staff.belongsTo(db.position,{ foreignKey: 'positionid' });
+}
+
+// Экспорт
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+----- End   src\models\index.js -----
+
+----- Begin src\models\ingredient.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('ingredient', {
+    ingredientid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    unitid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'unit',
+        key: 'unitid'
+      }
+    },
+    quantity: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+      defaultValue: 0
+    },
+    reorderlevel: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+      defaultValue: 0
+    }
+  }, {
+    sequelize,
+    tableName: 'ingredient',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16426_pk__ingredie__beaeb27a849adcc7",
+        unique: true,
+        fields: [
+          { name: "ingredientid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\ingredient.js -----
+
+----- Begin src\models\init-models.js -----
+var DataTypes = require("sequelize").DataTypes;
+var _client = require("./client");
+var _customerloyalty = require("./customerloyalty");
+var _discount = require("./discount");
+var _extras = require("./extras");
+var _ingredient = require("./ingredient");
+var _menucategory = require("./menucategory");
+var _menuitem = require("./menuitem");
+var _menuitemextras = require("./menuitemextras");
+var _menuitemtype = require("./menuitemtype");
+var _order = require("./order");
+var _orderitem = require("./orderitem");
+var _orderqueue = require("./orderqueue");
+var _orderstatus = require("./orderstatus");
+var _paymentmethod = require("./paymentmethod");
+var _position = require("./position");
+var _staff = require("./staff");
+var _supplier = require("./supplier");
+var _unit = require("./unit");
+
+function initModels(sequelize) {
+  var client = _client(sequelize, DataTypes);
+  var customerloyalty = _customerloyalty(sequelize, DataTypes);
+  var discount = _discount(sequelize, DataTypes);
+  var extras = _extras(sequelize, DataTypes);
+  var ingredient = _ingredient(sequelize, DataTypes);
+  var menucategory = _menucategory(sequelize, DataTypes);
+  var menuitem = _menuitem(sequelize, DataTypes);
+  var menuitemextras = _menuitemextras(sequelize, DataTypes);
+  var menuitemtype = _menuitemtype(sequelize, DataTypes);
+  var order = _order(sequelize, DataTypes);
+  var orderitem = _orderitem(sequelize, DataTypes);
+  var orderqueue = _orderqueue(sequelize, DataTypes);
+  var orderstatus = _orderstatus(sequelize, DataTypes);
+  var paymentmethod = _paymentmethod(sequelize, DataTypes);
+  var position = _position(sequelize, DataTypes);
+  var staff = _staff(sequelize, DataTypes);
+  var supplier = _supplier(sequelize, DataTypes);
+  var unit = _unit(sequelize, DataTypes);
+
+  // связи «добавки ↔ товары»
+  extras.belongsToMany(menuitem, {
+    as: 'menuitemid_menuitems',
+    through: menuitemextras,
+    foreignKey: "extraid",
+    otherKey: "menuitemid"
+  });
+  menuitem.belongsToMany(extras, {
+    as: 'extraid_extras',
+    through: menuitemextras,
+    foreignKey: "menuitemid",
+    otherKey: "extraid"
+  });
+
+  // клиенты ↔ лояльность
+  customerloyalty.belongsTo(client, { as: "client", foreignKey: "clientid" });
+  client.hasMany(customerloyalty, { as: "customerloyalties", foreignKey: "clientid" });
+
+  // заказы ↔ клиенты и скидки
+  order.belongsTo(client, { as: "client", foreignKey: "clientid" });
+  client.hasMany(order, { as: "orders", foreignKey: "clientid" });
+  order.belongsTo(discount, { as: "discount", foreignKey: "discountid" });
+  discount.hasMany(order, { as: "orders", foreignKey: "discountid" });
+
+  // промежуточная таблица добавок
+  menuitemextras.belongsTo(extras, { as: "extra", foreignKey: "extraid" });
+  extras.hasMany(menuitemextras, { as: "menuitemextras", foreignKey: "extraid" });
+
+  // товары ↔ категории
+  menuitem.belongsTo(menucategory, { as: "category", foreignKey: "categoryid" });
+  menucategory.hasMany(menuitem, { as: "menuitems", foreignKey: "categoryid" });
+
+  // товары ↔ их добавки
+  menuitemextras.belongsTo(menuitem, { as: "menuitem", foreignKey: "menuitemid" });
+  menuitem.hasMany(menuitemextras, { as: "menuitemextras", foreignKey: "menuitemid" });
+
+  // позиции заказа ↔ товары
+  orderitem.belongsTo(menuitem, { as: "menuitem", foreignKey: "menuitemid" });
+  menuitem.hasMany(orderitem, { as: "orderitems", foreignKey: "menuitemid" });
+
+  // позиции заказа ↔ заказ
+  orderitem.belongsTo(order, { as: "order", foreignKey: "orderid" });
+  order.hasMany(orderitem, { as: "orderitems", foreignKey: "orderid" });
+
+  // очередь ↔ заказ
+  orderqueue.belongsTo(order, { as: "order", foreignKey: "orderid" });
+  order.hasMany(orderqueue, { as: "orderqueues", foreignKey: "orderid" });
+
+  // заказ ↔ статус и способ оплаты
+  order.belongsTo(orderstatus, { as: "orderstatus", foreignKey: "orderstatusid" });
+  orderstatus.hasMany(order, { as: "orders", foreignKey: "orderstatusid" });
+  order.belongsTo(paymentmethod, { as: "paymentmethod", foreignKey: "paymentmethodid" });
+  paymentmethod.hasMany(order, { as: "orders", foreignKey: "paymentmethodid" });
+
+  // сотрудники ↔ должности
+  staff.belongsTo(position, { as: "position", foreignKey: "positionid" });
+  position.hasMany(staff, { as: "staffs", foreignKey: "positionid" });
+
+  // ингредиенты ↔ единицы измерения
+  ingredient.belongsTo(unit, { as: "unit", foreignKey: "unitid" });
+  unit.hasMany(ingredient, { as: "ingredients", foreignKey: "unitid" });
+
+  // категории ↔ типы меню
+  menucategory.belongsTo(menuitemtype, { as: "menuitemtype", foreignKey: "menuitemtypeid" });
+  menuitemtype.hasMany(menucategory, { as: "menucategories", foreignKey: "menuitemtypeid" });
+
+  return {
+    client,
+    customerloyalty,
+    discount,
+    extras,
+    ingredient,
+    menucategory,
+    menuitem,
+    menuitemextras,
+    menuitemtype,
+    order,
+    orderitem,
+    orderqueue,
+    orderstatus,
+    paymentmethod,
+    position,
+    staff,
+    supplier,
+    unit,
+  };
+}
+
+module.exports = initModels;
+module.exports.initModels = initModels;
+module.exports.default = initModels;
+----- End   src\models\init-models.js -----
+
+----- Begin src\models\menucategory.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('menucategory', {
+    categoryid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    menuitemtypeid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+      references: {
+        model: 'menuitemtype',
+        key: 'menuitemtypeid'
+      }
+    }
+  }, {
+    sequelize,
+    tableName: 'menucategory',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16443_pk__menucate__19093a2b3179bd47",
+        unique: true,
+        fields: [
+          { name: "categoryid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\menucategory.js -----
+
+----- Begin src\models\menuitem.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('menuitem', {
+    menuitemid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    price: {
+      type: DataTypes.DECIMAL,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    categoryid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'menucategory',
+        key: 'categoryid'
+      }
+    }
+  }, {
+    sequelize,
+    tableName: 'menuitem',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16451_ix_menuitem_categoryid",
+        fields: [
+          { name: "categoryid" },
+        ]
+      },
+      {
+        name: "idx_16451_pk__menuitem__8943f702945802c5",
+        unique: true,
+        fields: [
+          { name: "menuitemid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\menuitem.js -----
+
+----- Begin src\models\menuitemextras.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('menuitemextras', {
+    menuitemid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'menuitem',
+        key: 'menuitemid'
+      }
+    },
+    extraid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'extras',
+        key: 'extraid'
+      }
+    },
+    isdefault: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    }
+  }, {
+    sequelize,
+    tableName: 'menuitemextras',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16457_pk_menuitemextras",
+        unique: true,
+        fields: [
+          { name: "menuitemid" },
+          { name: "extraid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\menuitemextras.js -----
+
+----- Begin src\models\menuitemtype.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('menuitemtype', {
+    menuitemtypeid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    typename: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'menuitemtype',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16469_pk__menuitem__c1851df09bbc7512",
+        unique: true,
+        fields: [
+          { name: "menuitemtypeid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\menuitemtype.js -----
+
+----- Begin src\models\order.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('order', {
+    orderid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    orderdatetime: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+    totalamount: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+      defaultValue: 0
+    },
+    staffid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'staff',
+        key: 'staffid'
+      }
+    },
+    orderstatusid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'orderstatus',
+        key: 'orderstatusid'
+      }
+    },
+    paymentmethodid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'paymentmethod',
+        key: 'paymentmethodid'
+      }
+    },
+    paymentstatus: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    clientid: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'client',
+        key: 'clientid'
+      }
+    },
+    discountid: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'discount',
+        key: 'discountid'
+      }
+    }
+  }, {
+    sequelize,
+    tableName: 'order',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16476_pk__order__c3905bafe410f856",
+        unique: true,
+        fields: [
+          { name: "orderid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\order.js -----
+
+----- Begin src\models\orderitem.js -----
+// src/models/orderitem.js
+'use strict';
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('orderitem', {
+    orderitemid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    orderid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'order', key: 'orderid' }
+    },
+    menuitemid: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: 'menuitem', key: 'menuitemid' }
+    },
+    // -- поле productid удалено, т.к. таблицы readyproduct нет --
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1
+    },
+    price: {
+      type: DataTypes.DECIMAL,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'orderitem',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16485_pk__orderite__57ed06a13a13c554",
+        unique: true,
+        fields: [{ name: "orderitemid" }]
+      }
+    ]
+  });
+};
+----- End   src\models\orderitem.js -----
+
+----- Begin src\models\orderitemaddons.js -----
+// src/models/orderitemaddons.js
+'use strict';
+module.exports = (sequelize, DataTypes) => {
+  return sequelize.define('orderitemaddons', {
+    orderitemid: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true,
+      references: { model: 'orderitem', key: 'orderitemid' }
+    },
+    extraid: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true,
+      references: { model: 'extras', key: 'extraid' }
+    }
+  }, {
+    sequelize,
+    tableName: 'orderitemaddons',
+    schema: 'public',
+    timestamps: false
+  });
+};
+----- End   src\models\orderitemaddons.js -----
+
+----- Begin src\models\orderqueue.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('orderqueue', {
+    queueid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    orderid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'order',
+        key: 'orderid'
+      }
+    },
+    queuestatus: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    timestamp: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+    estimatedtime: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'orderqueue',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16493_pk__orderque__8324e715bbccc4b6",
+        unique: true,
+        fields: [
+          { name: "queueid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\orderqueue.js -----
+
+----- Begin src\models\orderstatus.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('orderstatus', {
+    orderstatusid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    statusname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'orderstatus',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16501_pk__ordersta__bc674f41cceeca70",
+        unique: true,
+        fields: [
+          { name: "orderstatusid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\orderstatus.js -----
+
+----- Begin src\models\paymentmethod.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('paymentmethod', {
+    paymentmethodid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    paymentname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'paymentmethod',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16508_pk__paymentm__dc31c1f39c08274f",
+        unique: true,
+        fields: [
+          { name: "paymentmethodid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\paymentmethod.js -----
+
+----- Begin src\models\position.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('position', {
+    positionid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    positionname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'position',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16515_pk__position__60bb9a59a60fd5eb",
+        unique: true,
+        fields: [
+          { name: "positionid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\position.js -----
+
+----- Begin src\models\staff.js -----
+// модель staff обновлена под актуальную схему таблицы
+module.exports = (sequelize, DataTypes) => {
+  return sequelize.define('staff', {
+    staffid: {
+      type: DataTypes.BIGINT,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    positionid: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    phone:  DataTypes.TEXT,
+    email:  DataTypes.TEXT,
+
+    /* ─── добавленные колонки ─── */
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    login: {
+      type: DataTypes.TEXT,
+      unique: true
+    },
+    role: DataTypes.TEXT            // 'admin', 'cashier', …
+  }, {
+    tableName: 'staff',
+    timestamps: false
+  });
+};
+----- End   src\models\staff.js -----
+
+----- Begin src\models\supplier.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('supplier', {
+    supplierid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    suppliername: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    contactperson: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    phone: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    email: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'supplier',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16572_pk__supplier__4be666b4e365000f",
+        unique: true,
+        fields: [
+          { name: "supplierid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\supplier.js -----
+
+----- Begin src\models\unit.js -----
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('unit', {
+    unitid: {
+      autoIncrement: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      primaryKey: true
+    },
+    unitname: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'unit',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "idx_16586_pk__unit__44f5ec95501c60db",
+        unique: true,
+        fields: [
+          { name: "unitid" },
+        ]
+      },
+    ]
+  });
+};
+----- End   src\models\unit.js -----
+

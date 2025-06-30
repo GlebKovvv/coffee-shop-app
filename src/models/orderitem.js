@@ -1,3 +1,5 @@
+// src/models/orderitem.js
+'use strict';
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('orderitem', {
@@ -10,27 +12,14 @@ module.exports = function(sequelize, DataTypes) {
     orderid: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'order',
-        key: 'orderid'
-      }
+      references: { model: 'order', key: 'orderid' }
     },
     menuitemid: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'menuitem',
-        key: 'menuitemid'
-      }
+      references: { model: 'menuitem', key: 'menuitemid' }
     },
-    productid: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'readyproduct',
-        key: 'productid'
-      }
-    },
+    // -- поле productid удалено, т.к. таблицы readyproduct нет --
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -49,10 +38,8 @@ module.exports = function(sequelize, DataTypes) {
       {
         name: "idx_16485_pk__orderite__57ed06a13a13c554",
         unique: true,
-        fields: [
-          { name: "orderitemid" },
-        ]
-      },
+        fields: [{ name: "orderitemid" }]
+      }
     ]
   });
 };

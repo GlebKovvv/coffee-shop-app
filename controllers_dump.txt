@@ -1,0 +1,798 @@
+﻿----- Begin src\controllers\authController.js -----
+const jwt   = require('jsonwebtoken');
+const { staff } = require('../models');
+
+const JWT_SECRET   = (process.env.JWT_SECRET || 'secret').trim();
+const ADMIN_PASS   = (process.env.ADMIN_PASS || '').trim();
+const CASHIER_PASS = (process.env.CASHIER_PASS || '').trim();
+
+/* POST /api/auth/login */
+exports.login = async (req, res) => {
+    console.log('LOGIN-TRY', req.body);
+  const { login, password } = req.body;
+
+  const u = await staff.findOne({ where:{ login, active:true } });
+  console.log('FOUND', u && u.toJSON());
+  if (!u) return res.status(401).json({ message:'Неверный логин' });
+
+  const ok =
+    (u.role === 'admin'   && password === ADMIN_PASS)   ||
+    (u.role === 'cashier' && password === CASHIER_PASS);
+
+  if (!ok) return res.status(401).json({ message:'Неверный пароль' });
+
+  const token = jwt.sign(
+    { userid: u.staffid, role: u.role, name: u.name },
+    JWT_SECRET, { expiresIn:'1d' }
+  );
+
+  /* ставим httpOnly-cookie на 24ч */
+  res.cookie('token', token, {
+    httpOnly : true,
+    sameSite : 'strict',
+    maxAge   : 24*60*60*1000
+  });
+
+  res.json({ role:u.role, name:u.fio });
+};
+
+/* GET /api/auth/me */
+exports.me = (req, res) => res.json(req.user);
+
+/* POST /api/auth/logout */
+exports.logout = (_req, res) => {
+  res.clearCookie('token');
+  res.sendStatus(204);
+};
+----- End   src\controllers\authController.js -----
+
+----- Begin src\controllers\categoryController.js -----
+const { menucategory, menuitem } = require('../models');
+
+/* ── GET /api/categories ─────────────────────────────────── */
+exports.getAll = async (_req, res) =>
+  res.json(await menucategory.findAll({ order: [['categoryid', 'ASC']] }));
+
+/* ── POST /api/categories ────────────────────────────────── */
+exports.create = async (req, res) => {
+  if (!req.body.name) return res.status(400).json({ error: 'name required' });
+  const cat = await menucategory.create({ name: req.body.name });
+  res.status(201).json(cat);
+};
+
+/* ── PUT /api/categories/:id ─────────────────────────────── */
+exports.update = async (req, res) => {
+  const cat = await menucategory.findByPk(req.params.id);
+  if (!cat) return res.status(404).json({ error: 'not found' });
+
+  if (!req.body.name) return res.status(400).json({ error: 'name required' });
+  cat.name = req.body.name;
+  await cat.save();
+  res.json(cat);
+};
+
+/* ── DELETE /api/categories/:id ──────────────────────────── */
+exports.remove = async (req, res) => {
+  const cat = await menucategory.findByPk(req.params.id);
+  if (!cat) return res.status(404).json({ error: 'not found' });
+
+  /* проверяем, есть ли товары в этой категории */
+  const items = await menuitem.count({ where: { categoryid: cat.categoryid } });
+  if (items) return res.status(409).json({ error: 'category has items' });
+
+  await cat.destroy();
+  res.json({ success: true });
+};
+----- End   src\controllers\categoryController.js -----
+
+----- Begin src\controllers\customerController.js -----
+const db = require('../models');
+
+/* ────────── ищем модель клиентов ────────── */
+let Cust = db.customer || db.customers || db.client;
+if (!Cust) {
+  Cust = Object.values(db).find(
+    m => m && m.tableName &&
+      ['customer','customers','client','clients'].includes(m.tableName.toLowerCase())
+  );
+}
+if (!Cust) throw new Error('Модель клиентов не найдена в db');
+
+/* ────────── helper: нормализация телефона ────────── */
+function norm(phone = '') {
+  return phone.replace(/\D+/g, '');     // оставляем только цифры
+}
+
+/* ────────── CRUD ────────── */
+exports.list = async (_req, res) =>
+  res.json(await Cust.findAll({ order: [[Cust.primaryKeyAttribute,'ASC']] }));
+
+exports.searchByPhone = async (req, res) => {
+  const phone = norm(req.query.phone || '');
+  if (!phone) return res.status(400).json({ error:'phone required' });
+
+  const c = await Cust.findOne({ where:{ phone } });
+  if (!c) return res.status(404).json({ error:'not found' });
+  res.json(c);
+};
+
+exports.create = async (req, res) => {
+  const phone = norm(req.body.phone || '');
+  if (!phone) return res.status(400).json({ error:'phone required' });
+
+  /* если такой телефон уже есть — 409 Conflict */
+  const exists = await Cust.findOne({ where:{ phone } });
+  if (exists) return res.status(409).json({ error:'phone exists', clientid: exists.clientid });
+
+  const { name = '', email } = req.body;
+  const c = await Cust.create({ name, phone, email, loyaltypoints: 0 });
+  res.status(201).json(c);
+};
+
+exports.update = async (req, res) => {
+  const c = await Cust.findByPk(req.params.id);
+  if (!c) return res.status(404).json({ error:'not found' });
+
+  if (req.body.phone) req.body.phone = norm(req.body.phone);
+  Object.assign(c, req.body);
+  await c.save();
+  res.json(c);
+};
+
+exports.remove = async (req, res) => {
+  const c = await Cust.findByPk(req.params.id);
+  if (!c) return res.status(404).json({ error:'not found' });
+  await c.destroy();
+  res.json({ success:true });
+};
+
+/* ────────── начисление баллов (вызывается из orderController) ────────── */
+exports.addPoints = async (clientid, delta, t = null) => {
+  if (delta <= 0 || !clientid) return;
+  await Cust.increment(
+    { loyaltypoints: delta },
+    { where:{ clientid }, transaction: t }
+  );
+};
+----- End   src\controllers\customerController.js -----
+
+----- Begin src\controllers\extraController.js -----
+/* src/controllers/extraController.js */
+const { extras, sequelize } = require('../models');
+
+/* ── ищем модель связи «order-item-addon» с любым именем ─────────── */
+const AddonLink = Object.values(sequelize.models)
+  .find(m => /(order[_]?item[_]?addons?)/i.test(m.tableName));
+
+if (!AddonLink) {
+  console.warn('⚠️  Таблица "orderitemaddons" не описана. ' +
+               'Удаляем добавки без проверки использования.');
+}
+
+/* ── GET /api/extras ─────────────────────────────────────────────── */
+exports.getAll = async (_req, res) => {
+  const list = await extras.findAll({ order: [['extraid', 'ASC']] });
+  res.json(list);
+};
+
+/* ── POST /api/extras ────────────────────────────────────────────── */
+exports.create = async (req, res) => {
+  try {
+    const e = await extras.create({
+      extraname:  req.body.extraname,
+      extraprice: req.body.extraprice
+    });
+    res.status(201).json(e);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+};
+
+/* ── PUT /api/extras/:id ─────────────────────────────────────────── */
+exports.update = async (req, res) => {
+  try {
+    const e = await extras.findByPk(req.params.id);
+    if (!e) return res.status(404).json({ error: 'not found' });
+
+    e.extraname  = req.body.extraname;
+    e.extraprice = req.body.extraprice;
+    await e.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+};
+
+/* ── DELETE /api/extras/:id ──────────────────────────────────────── */
+exports.remove = async (req, res) => {
+  try {
+    const e = await extras.findByPk(req.params.id);
+    if (!e) return res.status(404).json({ error: 'not found' });
+
+    if (AddonLink) {
+      const used = await AddonLink.count({ where: { extraid: e.extraid } });
+      if (used)
+        return res.status(409).json({ error: 'extra used in orders' });
+    }
+
+    await e.destroy();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+};
+----- End   src\controllers\extraController.js -----
+
+----- Begin src\controllers\inventoryController.js -----
+const db   = require('../models');
+const Item = db.ingredient;
+const Unit = db.unit;
+
+/* связь: ingredient → unit (если ещё не описана) */
+if (!Item.associations.unit) {
+  Item.belongsTo(Unit, { foreignKey: 'unitid' });
+}
+
+/* ---------- список ---------- */
+exports.list = async (_req, res) =>
+  res.json(await Item.findAll({
+    include:[{ model:Unit, attributes:['unitname'] }],
+    order:[['ingredientid','ASC']]
+  }));
+
+/* ---------- создать ---------- */
+exports.create = async (req, res) => {
+  try {
+    const { name, quantity, unitid, reorderlevel } = req.body;
+    if (!name || !unitid)
+      return res.status(400).json({ error:'name & unitid required' });
+
+    const row = await Item.create({
+      name,
+      quantity    : +quantity     || 0,
+      unitid,
+      reorderlevel: +reorderlevel || 0
+    });
+    res.status(201).json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};
+
+/* ---------- редактировать всю строку ---------- */
+exports.update = async (req, res) => {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+
+    Object.assign(row, {
+      name         : req.body.name,
+      quantity     : +req.body.quantity     || 0,
+      unitid       : req.body.unitid,
+      reorderlevel : +req.body.reorderlevel || 0
+    });
+    await row.save();
+    res.json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};
+
+/* ---------- прибавить / вычесть Δ ---------- */
+async function change(req, res, sign) {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+
+    const delta = +req.body.delta;
+    if (!delta || delta <= 0) return res.status(400).json({ error:'delta>0' });
+
+    const qty = parseFloat(row.quantity) || 0;
+    row.quantity = Math.max(0, qty + sign * delta);
+    await row.save();
+    res.json(row);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+}
+exports.add    = (req, res) => change(req, res, +1);
+exports.remove = (req, res) => change(req, res, -1);
+
+/* ---------- удалить позицию ---------- */
+exports.delete = async (req, res) => {
+  try {
+    const row = await Item.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error:'not found' });
+    await row.destroy();
+    res.json({ success:true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'db error' });
+  }
+};
+----- End   src\controllers\inventoryController.js -----
+
+----- Begin src\controllers\itemController.js -----
+/* ------------------------------------------------------------------
+   Контроллер «Товары»  (menuitem  +  menucategory)
+   ------------------------------------------------------------------ */
+const db = require('../models');
+const Item     = db.menuitem;       // товар для POS
+const Category = db.menucategory;   // категория (горячие, холодные …)
+const OrderItm = db.orderitem;      // для проверки «удалять нельзя»
+
+/* --- объявляем связь, если она вдруг не описана в моделях -------- */
+if (!Item.associations.menucategory) {
+  Item.belongsTo(Category, { foreignKey: 'categoryid' });
+}
+
+/* ------------------- GET /api/items (?category=ID) ---------------- */
+exports.list = async (req, res) => {
+  const where = req.query.category ? { categoryid: req.query.category } : undefined;
+
+  const rows = await Item.findAll({
+    where,
+    include : [{ model: Category, attributes: ['name'] }],
+    order   : [['menuitemid', 'ASC']]
+  });
+
+  res.json(rows);
+};
+
+/* ------------------- POST /api/items ------------------------------ */
+exports.create = async (req, res) => {
+  const { name, categoryid, price, active = true } = req.body;
+  if (!name || !categoryid || price == null) {
+    return res.status(400).json({ error: 'name, categoryid, price required' });
+  }
+
+  const row = await Item.create({
+    name,
+    categoryid,
+    price      : +price,
+    active     : !!active
+  });
+
+  res.status(201).json(row);
+};
+
+/* ------------------- PUT /api/items/:id --------------------------- */
+exports.update = async (req, res) => {
+  const row = await Item.findByPk(req.params.id);
+  if (!row) return res.status(404).json({ error: 'not found' });
+
+  Object.assign(row, {
+    name       : req.body.name,
+    categoryid : req.body.categoryid,
+    price      : +req.body.price,
+    active     : req.body.active
+  });
+  await row.save();
+  res.json(row);
+};
+
+/* ------------------- DELETE /api/items/:id ------------------------ */
+exports.remove = async (req, res) => {
+  const row = await Item.findByPk(req.params.id);
+  if (!row) return res.status(404).json({ error: 'not found' });
+
+  const used = await OrderItm.count({ where: { menuitemid: row.menuitemid } });
+  if (used) return res.status(409).json({ error: 'item used in orders' });
+
+  await row.destroy();
+  res.json({ success: true });
+};
+----- End   src\controllers\itemController.js -----
+
+----- Begin src\controllers\orderController.js -----
+/* ─────────────────────────────────────────────────────────────
+   orderController.js
+   ───────────────────────────────────────────────────────────── */
+const {
+  order, orderitem, orderitemaddons,
+  menuitem, extra, staff, customer,    // ★ добавили customer для баллов
+  sequelize
+} = require('../models');
+const { Op } = require('sequelize');
+
+const STATUS_NEW       = 1;
+const STATUS_COMPLETED = 2;
+
+/* ── суточный номер ─────────────────────────────────────── */
+async function nextDailyNumber(t){
+  const d=new Date();d.setHours(0,0,0,0);
+  return await order.count({
+    where:{orderdatetime:{[Op.gte]:d}},transaction:t
+  }) + 1;
+}
+
+/* ── staffId: либо передан, либо первый из таблицы ──────── */
+async function resolveStaffId(t,id){
+  if(id) return id;
+  const s = await staff.findOne({ attributes:['staffid'], transaction:t });
+  if(!s) throw new Error('no-staff');
+  return s.staffid;
+}
+
+/* ── GET /api/orders/active ─────────────────────────────── */
+exports.getActive = async (_req,res)=>{
+  try{
+    const sql=`
+      SELECT o.orderid,
+             COALESCE(o.ordernumber,o.orderid) AS ordernumber,
+             o.orderdatetime,
+             o.totalamount,
+             o.orderstatusid,
+             STRING_AGG(m.name||' ×'||oi.quantity, ', ') AS items
+      FROM "order" o
+      JOIN orderitem oi ON oi.orderid=o.orderid
+      JOIN menuitem  m ON m.menuitemid=oi.menuitemid
+      WHERE o.orderstatusid <> :done
+      GROUP BY o.orderid
+      ORDER BY o.orderdatetime`;
+    const list=await sequelize.query(sql,{
+      replacements:{done:STATUS_COMPLETED},
+      type:sequelize.QueryTypes.SELECT
+    });
+    res.json(list);
+  }catch(e){console.error(e);res.status(500).json({error:'db error'});}
+};
+
+/* ── POST /api/orders ───────────────────────────────────── */
+exports.create = async (req,res)=>{
+
+  /* ★ clientid теперь деструктурируем из body */
+  const {items,payType,staffId,clientid=null,discount=0}=req.body;
+
+  if(!Array.isArray(items)||!items.length)
+    return res.status(400).json({error:'items required'});
+
+  try{
+    const result = await sequelize.transaction(async t=>{
+      const sid   = await resolveStaffId(t,staffId);
+      const num   = await nextDailyNumber(t);
+      const total = items.reduce((s,p)=>s+p.price*(p.qty||1),0)-discount;
+
+      /* создаём заказ */
+      const o = await order.create({
+        orderdatetime : new Date(),
+        totalamount   : total,
+        ordernumber   : num,
+        orderstatusid : STATUS_NEW,
+        paymentmethodid: payType==='card'?2:1,
+        staffid       : sid,
+        clientid      : clientid            // ★ сохраняем клиента, если есть
+      },{transaction:t});
+
+      /* ★ начисляем баллы клиенту, если указан */
+      if (clientid) {
+        const pts = Math.floor(total / 50);          // 1 балл за каждые 50 ₽
+        await customer.increment(
+          { loyaltypoints: pts },
+          { where:{ clientid }, transaction:t }
+        );
+      }
+
+      /* позиции заказа */
+      for(const p of items){
+        const oi=await orderitem.create({
+          orderid:o.orderid,
+          menuitemid:p.menuitemid,
+          quantity:p.qty||1,
+          price:p.price
+        },{transaction:t});
+
+        /* добавки к позиции */
+        for(const ex of p.extras||[])
+          await orderitemaddons.create(
+            {orderitemid:oi.orderitemid,extraid:ex},
+            {transaction:t});
+      }
+      return { orderid:o.orderid, number:num };
+    });
+    res.status(201).json(result);
+
+  }catch(e){
+    console.error(e);
+    if(e.message==='no-staff')
+      return res.status(400).json({error:'таблица staff пуста'});
+    res.status(500).json({error:'db error'});
+  }
+};
+
+/* ── PUT /api/orders/:id/complete ───────────────────────── */
+exports.complete = async (req,res)=>{
+  const o = await order.findByPk(req.params.id);
+  if(!o) return res.status(404).json({error:'not found'});
+  o.orderstatusid=STATUS_COMPLETED; await o.save();
+  res.json({success:true});
+};
+
+/* ── GET /api/orders ─ полный список (опц. фильтр по статусу) ─── */
+exports.getAll = async (req, res) => {
+  const where = req.query.status
+    ? { orderstatusid: req.query.status }
+    : undefined;
+  try {
+    const list = await order.findAll({
+      where,
+      include: [
+        {
+          model: orderitem,
+          include: [
+            { model: orderitemaddons, include: [ extra ] },
+            { model: menuitem }
+          ]
+        }
+      ],
+      order: [['orderdatetime', 'DESC']]
+    });
+    res.json(list);
+  } catch (err) {
+    console.error('getAll error:', err);
+    res.status(500).json({ error: 'db error' });
+  }
+};
+----- End   src\controllers\orderController.js -----
+
+----- Begin src\controllers\positionController.js -----
+const db = require('../models');
+
+/* ищем модель: position / positions / employee_position */
+let Position = db.position || db.positions;
+if (!Position) Position = Object.values(db).find(
+  m => m && m.tableName && ['position','positions','employee_position']
+       .includes(m.tableName.toLowerCase())
+);
+if (!Position) throw new Error('Модель должностей не найдена');
+
+exports.list = async (_req, res) => {
+  const list = await Position.findAll({ order: [['positionid','ASC']] });
+  res.json(list);
+};
+----- End   src\controllers\positionController.js -----
+
+----- Begin src\controllers\reportController.js -----
+// src/controllers/reportController.js
+const db  = require('../models');
+const { Op, literal } = require('sequelize');
+
+/* helper диапазон */
+const rng = (f, t) => ({
+  [Op.between]: [
+    new Date((f||t)+' 00:00'),
+    new Date((t||f)+' 23:59')
+  ]
+});
+
+/* ──────────────────────────────────────────────────────────
+   1. Продажи  (оставляем как есть — был рабочим)
+   ────────────────────────────────────────────────────────── */
+exports.sales = async (req,res)=>{
+  try{
+    const {from,to}=req.query;
+    const rows = await db.order.findAll({
+      attributes:[
+        [db.sequelize.fn('date',db.sequelize.col('orderdatetime')),'day'],
+        [db.sequelize.fn('count',  '*'),'orders'],
+        [db.sequelize.fn('sum',    db.sequelize.col('totalamount')),'revenue']
+      ],
+      where:{ orderdatetime:rng(from,to) },
+      group:[literal('day')], order:[literal('day')]
+    });
+    const tot = rows.reduce((a,r)=>({
+      orders:  a.orders  + +r.get('orders'),
+      revenue: a.revenue + +r.get('revenue')
+    }),{orders:0,revenue:0});
+    res.json({ rows:rows.map(r=>r.dataValues),
+               totals:tot,
+               avgCheck: tot.orders? (tot.revenue/tot.orders).toFixed(2):0 });
+  }catch(e){console.error(e);res.status(500).json({error:e.message});}
+};
+
+/* ──────────────────────────────────────────────────────────
+   2. Топ-товары  —  RAW SQL
+   ────────────────────────────────────────────────────────── */
+/* --- 2. ТОП-ТОВАРЫ  --------------------------------------- */
+exports.topProducts = async (req, res) => {
+  try {
+    const { from, to, limit = 5 } = req.query;
+
+    const sql = `
+      SELECT  m.name AS name,
+              COUNT(*)      AS qty
+      FROM    orderitem oi
+      JOIN    "order"   o  USING(orderid)
+      JOIN    menuitem  m  USING(menuitemid)
+      WHERE   o.orderdatetime BETWEEN :from AND :to
+      GROUP BY m.name
+      ORDER BY qty DESC
+      LIMIT   :limit`;
+
+    const rows = await db.sequelize.query(sql, {
+      replacements: {
+        from:  from + ' 00:00',
+        to:    to   + ' 23:59',
+        limit: +limit
+      },
+      type: db.sequelize.QueryTypes.SELECT
+    });
+
+    res.json(rows);                    // [{ name:'Капучино', qty:12 }, …]
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+};
+
+
+/* ──────────────────────────────────────────────────────────
+   3. Остатки ниже минимума
+   ────────────────────────────────────────────────────────── */
+exports.lowStock = async (_req,res)=>{
+  try{
+    /* проверяем, что за поле минимального остатка есть в таблице */
+    const colMin = db.ingredient.rawAttributes.reorderlevel ? 'reorderlevel' : 'min_quantity';
+    const rows = await db.ingredient.findAll({
+      where: literal(`quantity < ${colMin}`),
+      include:[{model:db.unit,attributes:['unitname']}],
+      order:['name']
+    });
+    res.json(rows.map(r=>({
+      name:r.name,
+      quantity:r.quantity,
+      min:r[colMin],
+      unit:r.unit.unitname
+    })));
+  }catch(e){console.error(e);res.status(500).json({error:e.message});}
+};
+
+/* ──────────────────────────────────────────────────────────
+   4. Эффективность сотрудников  —  RAW SQL
+   ────────────────────────────────────────────────────────── */
+exports.byStaff = async (req,res)=>{
+  try{
+    const {from,to}=req.query;
+    const sql = `
+      SELECT  s.name       AS staff,
+              COUNT(o.*)   AS orders,
+              SUM(o.totalamount) AS revenue
+      FROM    "order" o
+      JOIN    staff   s ON s.staffid = o.staffid
+      WHERE   o.orderdatetime BETWEEN :from AND :to
+      GROUP BY s.name
+      ORDER BY revenue DESC`;
+    const rows = await db.sequelize.query(sql,{
+      replacements:{from:from+' 00:00', to:to+' 23:59'},
+      type: db.sequelize.QueryTypes.SELECT
+    });
+    res.json(rows);
+  }catch(e){console.error(e);res.status(500).json({error:e.message});}
+};
+----- End   src\controllers\reportController.js -----
+
+----- Begin src\controllers\settingController.js -----
+exports.get = async (_req, res) =>
+  res.json({ message: 'Настройки пока пусты' });
+----- End   src\controllers\settingController.js -----
+
+----- Begin src\controllers\staffController.js -----
+// src/controllers/staffController.js
+const db = require('../models');
+
+// 1) находим модель сотрудников (staff или employee)
+let StaffModel = db.staff || db.employee;
+if (!StaffModel) {
+  StaffModel = Object.values(db).find(
+    m => m && m.tableName && ['staff','employee','employees']
+         .includes(m.tableName.toLowerCase())
+  );
+}
+if (!StaffModel) {
+  throw new Error('Модель сотрудников не найдена в db');
+}
+
+// 2) находим модель должностей
+let PositionModel = db.position || db.positions;
+if (!PositionModel) {
+  PositionModel = Object.values(db).find(
+    m => m && m.tableName && ['position','positions']
+         .includes(m.tableName.toLowerCase())
+  );
+}
+
+// GET /api/staff
+exports.list = async (_req, res) => {
+  const list = await StaffModel.findAll({
+    include: PositionModel
+      ? [{ model: PositionModel, attributes: ['positionname'] }]
+      : [],
+    order: [[StaffModel.primaryKeyAttribute, 'ASC']]
+  });
+  res.json(list);
+};
+
+// POST /api/staff
+exports.create = async (req, res) => {
+  const { name, positionid, phone, email } = req.body;
+  if (!name || !positionid) {
+    return res.status(400).json({ error: 'name + positionid required' });
+  }
+  const s = await StaffModel.create({ name, positionid, phone, email });
+  res.status(201).json(s);
+};
+
+// PUT /api/staff/:id
+exports.update = async (req, res) => {
+  const s = await StaffModel.findByPk(req.params.id);
+  if (!s) return res.status(404).json({ error: 'not found' });
+  Object.assign(s, req.body);
+  await s.save();
+  res.json(s);
+};
+
+// DELETE /api/staff/:id  — «жёсткое» удаление с проверкой FK
+exports.remove = async (req, res) => {
+  try {
+    const count = await StaffModel.destroy({
+      where: { [StaffModel.primaryKeyAttribute]: req.params.id }
+    });
+    if (!count) {
+      return res.status(404).json({ error: 'not found' });
+    }
+    res.json({ success: true });
+  } catch (e) {
+    if (e.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(409).json({ error: 'has linked records' });
+    }
+    console.error(e);
+    res.status(500).json({ error: 'db error' });
+  }
+};
+----- End   src\controllers\staffController.js -----
+
+----- Begin src\controllers\supplierController.js -----
+const db = require('../models');
+const Supplier = db.supplier;          // ← точное имя модели!
+
+exports.list   = async (_req,res)=>
+  res.json(await Supplier.findAll({ order:[['supplierid','ASC']] }));
+
+exports.create = async (req,res)=>{
+  if(!req.body.suppliername)
+    return res.status(400).json({error:'suppliername required'});
+  res.status(201).json(await Supplier.create(req.body));
+};
+
+exports.update = async (req,res)=>{
+  const s = await Supplier.findByPk(req.params.id);
+  if(!s) return res.status(404).json({error:'not found'});
+  Object.assign(s, req.body);
+  await s.save();
+  res.json(s);
+};
+
+exports.remove = async (req,res)=>{
+  const s = await Supplier.findByPk(req.params.id);
+  if(!s) return res.status(404).json({error:'not found'});
+  await s.destroy();
+  res.json({success:true});
+};
+----- End   src\controllers\supplierController.js -----
+
+----- Begin src\controllers\unitController.js -----
+const { unit } = require('../models');
+
+/* GET /api/units — список единиц измерения */
+exports.list = async (_req, res) => {
+  const list = await unit.findAll({ order: [['unitid', 'ASC']] });
+  res.json(list);
+};
+----- End   src\controllers\unitController.js -----
+

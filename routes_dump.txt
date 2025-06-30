@@ -1,0 +1,146 @@
+﻿----- Begin src\routes\authRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/authController');
+const auth = require('../middleware/auth');
+
+r.post('/login',  c.login);
+r.post('/logout', c.logout);
+r.get ('/me',     auth, c.me);
+
+module.exports = r;
+----- End   src\routes\authRoutes.js -----
+
+----- Begin src\routes\categoryRoutes.js -----
+const r  = require('express').Router();
+const c  = require('../controllers/categoryController');
+const { role } = require('../middleware/auth');
+
+/* чтение нужно POS, поэтому cashier + admin */
+r.get('/',          role('cashier','admin'), c.getAll);
+
+/* изменять может только администратор */
+r.post('/',         role('admin'),           c.create);
+r.put('/:id',       role('admin'),           c.update);
+r.delete('/:id',    role('admin'),           c.remove);
+
+module.exports = r;
+----- End   src\routes\categoryRoutes.js -----
+
+----- Begin src\routes\customerRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/customerController');
+
+r.get('/',        c.list);
+r.get('/search',  c.searchByPhone);
+r.post('/',       c.create);
+r.put('/:id',     c.update);
+r.delete('/:id',  c.remove);
+
+module.exports = r;
+----- End   src\routes\customerRoutes.js -----
+
+----- Begin src\routes\extraRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/extraController');
+
+r.get('/',       c.getAll);
+r.post('/',      c.create);
+r.put('/:id',    c.update);
+r.delete('/:id', c.remove);
+
+module.exports = r;
+----- End   src\routes\extraRoutes.js -----
+
+----- Begin src\routes\inventoryRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/inventoryController');
+
+r.get('/',            c.list);
+r.post('/',           c.create);
+r.patch('/:id',       c.update);      // редактировать строку целиком
+r.patch('/:id/add',   c.add);         // +Δ
+r.patch('/:id/remove',c.remove);      // −Δ
+r.delete('/:id',      c.delete);      // удалить позицию
+
+module.exports = r;
+----- End   src\routes\inventoryRoutes.js -----
+
+----- Begin src\routes\itemRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/itemController');
+const { role } = require('../middleware/auth');
+
+r.get ('/',        role('cashier','admin'), c.list);   // список меню для POS
+r.post('/',        role('admin'),           c.create);
+r.put ('/:id',     role('admin'),           c.update);
+r.delete('/:id',   role('admin'),           c.remove);
+
+module.exports = r;
+----- End   src\routes\itemRoutes.js -----
+
+----- Begin src\routes\orderRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/orderController');
+
+r.get('/',        c.getAll);     // ?status=new|completed…
+r.get('/active',  c.getActive);  // список активных
+r.post('/',       c.create);     // создать заказ
+r.put('/:id/complete', c.complete); // завершить заказ
+
+module.exports = r;
+----- End   src\routes\orderRoutes.js -----
+
+----- Begin src\routes\positionRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/positionController');
+r.get('/', c.list);
+module.exports = r;
+----- End   src\routes\positionRoutes.js -----
+
+----- Begin src\routes\reportRoutes.js -----
+const r=require('express').Router(),c=require('../controllers/reportController');
+r.get('/sales',        c.sales);
+r.get('/top-products', c.topProducts);
+r.get('/low-stock',    c.lowStock);
+r.get('/by-staff',     c.byStaff);
+module.exports=r;
+----- End   src\routes\reportRoutes.js -----
+
+----- Begin src\routes\settingRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/positionController');
+r.get('/', c.list);
+module.exports = r;
+----- End   src\routes\settingRoutes.js -----
+
+----- Begin src\routes\staffRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/staffController');
+const { role } = require('../middleware/auth');
+
+/* список сотрудников (нужен POS) */
+r.get('/',        role('cashier','admin'),  c.list);      // ← list, не getAll
+
+/* CRUD — только администратор */
+r.post('/',       role('admin'),            c.create);
+r.put('/:id',     role('admin'),            c.update);
+r.delete('/:id',  role('admin'),            c.remove);
+
+module.exports = r;
+----- End   src\routes\staffRoutes.js -----
+
+----- Begin src\routes\supplierRoutes.js -----
+const r=require('express').Router(),c=require('../controllers/supplierController');
+r.get('/',c.list); r.post('/',c.create); r.put('/:id',c.update); r.delete('/:id',c.remove);
+module.exports=r;
+----- End   src\routes\supplierRoutes.js -----
+
+----- Begin src\routes\unitRoutes.js -----
+const r = require('express').Router();
+const c = require('../controllers/unitController');
+
+r.get('/', c.list);          // GET /api/units
+
+module.exports = r;
+----- End   src\routes\unitRoutes.js -----
+
