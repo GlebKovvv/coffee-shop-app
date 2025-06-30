@@ -1,44 +1,50 @@
-const db   = require('../models');
-const Item = db.ingredient;
-const Unit = db.unit;
+/* ──────────────────────────────────────────────────────────
+   src/controllers/inventoryController.js
+   ────────────────────────────────────────────────────────── */
+'use strict';
 
-/* связь: ingredient → unit (если ещё не описана) */
-if (!Item.associations.unit) {
-  Item.belongsTo(Unit, { foreignKey: 'unitid' });
-}
+const db = require('../models');
+const Item = db.ingredient;      // модель ингредиента (склад)
+const Unit = db.unit;            // модель единиц измерения
 
-/* ---------- список ---------- */
-exports.list = async (_req, res) =>
-  res.json(await Item.findAll({
-    include:[{ model:Unit, attributes:['unitname'] }],
-    order:[['ingredientid','ASC']]
-  }));
+/* ---------- GET /api/inventory ---------- */
+exports.list = async (_req, res) => {
+  const list = await Item.findAll({
+    include: [{
+      model      : Unit,
+      as         : 'unit',              // ← ОБЯЗАТЕЛЬНО — алиас из ассоциации
+      attributes : ['unitname']
+    }],
+    order: [['ingredientid', 'ASC']]
+  });
+  res.json(list);
+};
 
-/* ---------- создать ---------- */
+/* ---------- POST /api/inventory ---------- */
 exports.create = async (req, res) => {
   try {
     const { name, quantity, unitid, reorderlevel } = req.body;
     if (!name || !unitid)
-      return res.status(400).json({ error:'name & unitid required' });
+      return res.status(400).json({ error: 'name & unitid required' });
 
     const row = await Item.create({
       name,
-      quantity    : +quantity     || 0,
+      quantity     : +quantity     || 0,
       unitid,
-      reorderlevel: +reorderlevel || 0
+      reorderlevel : +reorderlevel || 0
     });
     res.status(201).json(row);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error:'db error' });
+    res.status(500).json({ error: 'db error' });
   }
 };
 
-/* ---------- редактировать всю строку ---------- */
+/* ---------- PATCH /api/inventory/:id ---------- */
 exports.update = async (req, res) => {
   try {
     const row = await Item.findByPk(req.params.id);
-    if (!row) return res.status(404).json({ error:'not found' });
+    if (!row) return res.status(404).json({ error: 'not found' });
 
     Object.assign(row, {
       name         : req.body.name,
@@ -50,18 +56,19 @@ exports.update = async (req, res) => {
     res.json(row);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error:'db error' });
+    res.status(500).json({ error: 'db error' });
   }
 };
 
-/* ---------- прибавить / вычесть Δ ---------- */
+/* ---------- change ±Δ ---------- */
 async function change(req, res, sign) {
   try {
     const row = await Item.findByPk(req.params.id);
-    if (!row) return res.status(404).json({ error:'not found' });
+    if (!row) return res.status(404).json({ error: 'not found' });
 
     const delta = +req.body.delta;
-    if (!delta || delta <= 0) return res.status(400).json({ error:'delta>0' });
+    if (!delta || delta <= 0)
+      return res.status(400).json({ error: 'delta > 0' });
 
     const qty = parseFloat(row.quantity) || 0;
     row.quantity = Math.max(0, qty + sign * delta);
@@ -69,21 +76,21 @@ async function change(req, res, sign) {
     res.json(row);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error:'db error' });
+    res.status(500).json({ error: 'db error' });
   }
 }
 exports.add    = (req, res) => change(req, res, +1);
 exports.remove = (req, res) => change(req, res, -1);
 
-/* ---------- удалить позицию ---------- */
+/* ---------- DELETE /api/inventory/:id ---------- */
 exports.delete = async (req, res) => {
   try {
     const row = await Item.findByPk(req.params.id);
-    if (!row) return res.status(404).json({ error:'not found' });
+    if (!row) return res.status(404).json({ error: 'not found' });
     await row.destroy();
-    res.json({ success:true });
+    res.json({ success: true });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error:'db error' });
+    res.status(500).json({ error: 'db error' });
   }
 };
