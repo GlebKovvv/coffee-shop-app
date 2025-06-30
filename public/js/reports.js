@@ -15,20 +15,26 @@ const REPORT = (() => {
     return res.json();
   }
 
-  /* CSV-скачивание */
-  function downloadCSV(rows, filename) {
-    if (!rows || !rows.length) return;
-    const csv = [
-      Object.keys(rows[0]).join(','),
-      ...rows.map(r => Object.values(r).join(','))
-    ].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
+/* CSV-скачивание c UTF-8 BOM  */
+function downloadCSV(rows, filename) {
+  if (!rows || !rows.length) return;
+
+  /* 1) собираем строки */
+  const csv = [
+    Object.keys(rows[0]).join(','),          // заголовок
+    ...rows.map(r => Object.values(r).join(','))
+  ].join('\n');
+
+  /* 2) добавляем BOM, чтобы Excel понял кодировку */
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+
+  /* 3) генерируем ссылку и кликаем */
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
   /* генерация HTML-таблицы */
   function makeTable(rows) {
