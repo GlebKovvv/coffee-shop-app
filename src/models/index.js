@@ -1,20 +1,17 @@
-// src/models/index.js
+// File: src/models/index.js
 'use strict';
 
 const fs        = require('fs');
 const path      = require('path');
 const Sequelize = require('sequelize');
-const sequelize = require('../config/db');   // готовое соединение
+const sequelize = require('../config/db');
 const basename  = path.basename(__filename);
 const db        = {};
 
-// ---------- автоматический импорт Sequelize-моделей ----------
+// 1) Импорт всех *.js-моделей, кроме index.js
 fs.readdirSync(__dirname)
   .filter(file =>
-    file.indexOf('.') !== 0 &&                 // не скрытые
-    file !== basename &&                       // не index.js
-    !['Category.js', 'init-models.js'].includes(file) &&  // пропуск DAO/генератора
-    file.endsWith('.js')
+    file !== basename && file.endsWith('.js')
   )
   .forEach(file => {
     const factory = require(path.join(__dirname, file));
@@ -24,24 +21,21 @@ fs.readdirSync(__dirname)
     }
   });
 
-// ---------- встроенные associate() ----------
-Object.values(db).forEach(m => m.associate && m.associate(db));
+// 2) Авто-ассоциации из моделей
+Object.values(db).forEach(model => {
+  if (model.associate) model.associate(db);
+});
 
-/* ---------- ручные ассоциации ---------- */
-
-// menuitem ↔ menucategory
-if (db.menuitem && db.menucategory) {
-  db.menuitem.belongsTo(db.menucategory, { foreignKey: 'categoryid' });
-  db.menucategory.hasMany(db.menuitem,   { foreignKey: 'categoryid' });
-}
-
-// order ↔ orderitem
+// 3) Ручные связи
 if (db.order && db.orderitem) {
-  db.order.hasMany(db.orderitem,    { foreignKey: 'orderid' });
-  db.orderitem.belongsTo(db.order,  { foreignKey: 'orderid' });
+  db.order.hasMany(db.orderitem,   { foreignKey: 'orderid' });
+  db.orderitem.belongsTo(db.order, { foreignKey: 'orderid' });
 }
-
-// orderitem ↔ extras  (many-to-many через orderitemaddons)
+if (db.order && db.orderqueue) {
+  db.order.hasOne(db.orderqueue,   { foreignKey: 'orderid' });
+  db.orderqueue.belongsTo(db.order,{ foreignKey: 'orderid' });
+}
+// при m:n extras ↔ orderitem через orderitemaddons
 if (db.orderitem && db.extras && db.orderitemaddons) {
   db.orderitem.belongsToMany(db.extras, {
     through:    db.orderitemaddons,
@@ -55,25 +49,6 @@ if (db.orderitem && db.extras && db.orderitemaddons) {
   });
 }
 
-// inventoryitem ↔ supplier
-if (db.inventoryitem && db.supplier) {
-  db.supplier.hasMany(db.inventoryitem, { foreignKey: 'supplierid' });
-  db.inventoryitem.belongsTo(db.supplier,{ foreignKey: 'supplierid' });
-}
-
-// ingredient ↔ unit
-if (db.ingredient && db.unit) {
-  db.unit.hasMany(db.ingredient,  { foreignKey: 'unitid' });
-  db.ingredient.belongsTo(db.unit,{ foreignKey: 'unitid' });
-}
-
-// staff ↔ position
-if (db.staff && db.position) {
-  db.position.hasMany(db.staff,  { foreignKey: 'positionid' });
-  db.staff.belongsTo(db.position,{ foreignKey: 'positionid' });
-}
-
-// ---------- экспорт ----------
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 module.exports = db;

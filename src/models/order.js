@@ -1,79 +1,58 @@
+// ──────────────────────────── src/models/order.js ────────────────────────────
+'use strict';
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
+
+module.exports = (sequelize, DataTypes) => {
   return sequelize.define('order', {
+    /* PK */
     orderid: {
-      autoIncrement: true,
       type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false
     },
+
+    /* дата-время оформления (по умолчанию now()) */
     orderdatetime: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
     },
+
+    /* итоговая сумма заказа */
     totalamount: {
       type: DataTypes.DECIMAL,
       allowNull: false,
       defaultValue: 0
     },
+
+    /* кассир / сотрудник, оформивший заказ */
     staffid: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'staff',
-        key: 'staffid'
-      }
+      references: { model: 'staff', key: 'staffid' }
     },
+
+    /* статус (“новый”, “готов”, “выдан”) */
     orderstatusid: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'orderstatus',
-        key: 'orderstatusid'
-      }
+      references: { model: 'orderstatus', key: 'orderstatusid' }
     },
+
+    /* способ оплаты (1 — наличка, 2 — карта) */
     paymentmethodid: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'paymentmethod',
-        key: 'paymentmethodid'
-      }
+      references: { model: 'paymentmethod', key: 'paymentmethodid' }
     },
-    paymentstatus: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    clientid: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'client',
-        key: 'clientid'
-      }
-    },
-    discountid: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'discount',
-        key: 'discountid'
-      }
-    }
+
+    paymentstatus:  DataTypes.TEXT,   // оплачен / возврат
+    clientid:       DataTypes.INTEGER,
+    discountid:     DataTypes.INTEGER
   }, {
-    sequelize,
-    tableName: 'order',
-    schema: 'public',
-    timestamps: false,
-    indexes: [
-      {
-        name: "idx_16476_pk__order__c3905bafe410f856",
-        unique: true,
-        fields: [
-          { name: "orderid" },
-        ]
-      },
-    ]
+    tableName : 'order',
+    schema    : 'public',
+    timestamps: false
   });
 };
